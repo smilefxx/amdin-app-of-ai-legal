@@ -1,0 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-brand-nav: #0F172A;
+  --color-brand-deep: #1E293B;
+  --color-brand-primary: #475569;
+  --color-brand-ice: #F8FAFC;
+  --color-bg-gray: #F8FAFC;
+  --color-success: #64748B;
+  --color-warning: #8B7355;
+  --color-danger: #991B1B;
+  --color-border: #E2E8F0;
+  --color-text-main: #1E293B;
+  --color-text-secondary: #475569;
+  --color-text-light: #94A3B8;
+
+  /* Muted Tailsind Palette for Professional Tone */
+  --color-blue-50: #F8FAFC;
+  --color-blue-100: #F1F5F9;
+  --color-blue-200: #E2E8F0;
+  --color-blue-300: #CBD5E1;
+  --color-blue-400: #94A3B8;
+  --color-blue-500: #64748B;
+  --color-blue-600: #475569;
+  --color-blue-700: #334155;
+  --color-blue-800: #1E293B;
+  --color-blue-900: #0F172A;
+
+  --color-emerald-50: #F4F5F4;
+  --color-emerald-100: #E6E8E6;
+  --color-emerald-200: #C9CEC9;
+  --color-emerald-300: #A8B1A8;
+  --color-emerald-400: #889388;
+  --color-emerald-500: #677567;
+  --color-emerald-600: #515E51;
+  --color-emerald-700: #3E483E;
+  --color-emerald-800: #2C352C;
+  --color-emerald-900: #1C221C;
+
+  --color-amber-50: #FDF9F3;
+  --color-amber-100: #FAEDE1;
+  --color-amber-200: #F2D6BA;
+  --color-amber-300: #E6BE91;
+  --color-amber-400: #D8A468;
+  --color-amber-500: #C78B42;
+  --color-amber-600: #B26F2E;
+  --color-amber-700: #8E5425;
+  --color-amber-800: #714421;
+  --color-amber-900: #5A381F;
+
+  --color-orange-50: #FFF7ED;
+  --color-orange-100: #FFEDD5;
+  --color-orange-200: #FED7AA;
+  --color-orange-300: #FDBA74;
+  --color-orange-400: #EAA462;
+  --color-orange-500: #D98944;
+  --color-orange-600: #BB6B29;
+  --color-orange-700: #9A5016;
+  --color-orange-800: #824110;
+  --color-orange-900: #6B340B;
+
+  --color-red-50: #FEF2F2;
+  --color-red-100: #FEE2E2;
+  --color-red-200: #FECACA;
+  --color-red-300: #FCA5A5;
+  --color-red-400: #E58282;
+  --color-red-500: #C95F5F;
+  --color-red-600: #AD4141;
+  --color-red-700: #912727;
+  --color-red-800: #7A1F1F;
+  --color-red-900: #661818;
+
+  --color-rose-50: #FFF1F2;
+  --color-rose-100: #FFE4E6;
+  --color-rose-200: #FECDD3;
+  --color-rose-300: #FDA4AF;
+  --color-rose-400: #E5808B;
+  --color-rose-500: #C95D69;
+  --color-rose-600: #A83C49;
+  --color-rose-700: #8A2632;
+  --color-rose-800: #73222B;
+  --color-rose-900: #611D25;
+
+  --color-purple-50: #F8F5FA;
+  --color-purple-100: #EFEEF6;
+  --color-purple-200: #DCD8E8;
+  --color-purple-300: #C3BDD6;
+  --color-purple-400: #A8A1C0;
+  --color-purple-500: #8C84A9;
+  --color-purple-600: #71698E;
+  --color-purple-700: #595272;
+  --color-purple-800: #443F57;
+  --color-purple-900: #312E40;
+
+  --color-indigo-50: #F5F7FA;
+  --color-indigo-100: #E9EDF5;
+  --color-indigo-200: #D1DBEB;
+  --color-indigo-300: #AABEE0;
+  --color-indigo-400: #84A1D2;
+  --color-indigo-500: #6486C1;
+  --color-indigo-600: #4B6BA4;
+  --color-indigo-700: #38517F;
+  --color-indigo-800: #293E63;
+  --color-indigo-900: #1D2D49;
+
+  --radius-2xl: 24px;
+  --radius-xl: 16px;
+  --radius-lg: 14px;
+  --radius-md: 12px;
+  --radius-sm: 10px;
+  
+  --shadow-premium: 0 4px 30px -5px rgba(0, 0, 0, 0.03), 0 10px 15px -10px rgba(0, 0, 0, 0.05);
+  --shadow-strong: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+}
+
+@layer base {
+  body {
+    @apply bg-bg-gray text-text-main font-sans antialiased selection:bg-brand-primary/10 selection:text-brand-primary;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl border border-border transition-all duration-300;
+    box-shadow: var(--shadow-premium);
+  }
+
+  .card-hover {
+    @apply hover:shadow-strong hover:border-slate-200;
+  }
+
+  .btn-primary {
+    @apply bg-brand-primary text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition-all flex items-center gap-2 active:scale-[0.98] shadow-lg shadow-brand-primary/20;
+  }
+
+  .btn-secondary {
+    @apply bg-white border border-slate-200 text-brand-deep px-5 py-2.5 rounded-xl font-semibold hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-[0.98] shadow-sm shadow-slate-100;
+  }
+
+  .stat-card {
+    @apply rounded-2xl border border-slate-100 p-6 flex flex-col gap-2 transition-all duration-300 bg-white;
+    box-shadow: var(--shadow-premium);
+  }
+
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/50 rounded-2xl shadow-premium;
+  }
+}
