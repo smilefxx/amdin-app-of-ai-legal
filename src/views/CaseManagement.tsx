@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
@@ -43,17 +43,34 @@ const MOCK_CASES: Case[] = [
 
 interface CaseManagementProps {
   onNavigate?: (tab: string) => void;
+  initialSearchTerm?: string;
 }
 
-export default function CaseManagement({ onNavigate }: CaseManagementProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+export default function CaseManagement({ onNavigate, initialSearchTerm = '' }: CaseManagementProps) {
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'closed' | 'archived'>('all');
+
+  const itemsPerPage = 2;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setSearchTerm(initialSearchTerm);
+    setCurrentPage(1); // Reset to first page on search change from prop
+  }, [initialSearchTerm]);
 
   const filteredCases = MOCK_CASES.filter(c => {
     const matchesSearch = c.title.includes(searchTerm) || c.caseNo.includes(searchTerm) || c.client.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredCases.length / itemsPerPage));
+  const currentCases = filteredCases.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Handle filter changes to reset page
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -165,14 +182,14 @@ export default function CaseManagement({ onNavigate }: CaseManagementProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredCases.map((c, idx) => (
+              {currentCases.map((c, idx) => (
                 <motion.tr 
                   key={c.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
                   className="group hover:bg-slate-50/50 transition-colors cursor-pointer"
-                  onClick={() => onNavigate?.('case_editor')}
+                  onClick={() => onNavigate?.('case_details')}
                 >
                   <td className="px-6 py-4">
                     <div className="flex flex-col gap-1">
@@ -212,7 +229,7 @@ export default function CaseManagement({ onNavigate }: CaseManagementProps) {
                          <History size={16} />
                        </button>
                        <button 
-                         onClick={(e) => { e.stopPropagation(); onNavigate?.('case_editor'); }} 
+                         onClick={(e) => { e.stopPropagation(); onNavigate?.('case_details'); }} 
                          className="flex items-center gap-1 text-xs font-bold text-brand-primary h-8 px-3 rounded-md hover:bg-brand-primary/5 transition-colors"
                        >
                          <span>详情</span>
@@ -234,12 +251,59 @@ export default function CaseManagement({ onNavigate }: CaseManagementProps) {
         )}
 
         <div className="px-6 py-4 bg-slate-50 border-t border-border flex items-center justify-between">
-          <p className="text-xs text-text-light">共 {filteredCases.length} 条记录</p>
-          <div className="flex items-center gap-2">
-            <button className="h-8 px-3 rounded text-xs font-medium border border-border bg-white text-text-secondary disabled:opacity-50" disabled>上一页</button>
-            <button className="h-8 w-8 rounded text-xs font-bold bg-brand-primary text-white shadow-sm shadow-brand-primary/20">1</button>
-            <button className="h-8 px-3 rounded text-xs font-medium border border-border bg-white text-text-secondary disabled:opacity-50" disabled>下一页</button>
-          </div>
+          <p className="text-xs text-text-light">
+            显示第 {(currentPage - 1) * itemsPerPage + 1} 到 {Math.min(currentPage * itemsPerPage, filteredCases.length)} 条，共 {filteredCases.length} 条记录
+          </p>
+          {totalPages > 0 && (
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="h-8 px-3 rounded text-xs font-medium border border-border bg-white text-text-secondary hover:text-brand-primary disabled:opacity-50 disabled:hover:text-text-secondary transition-all"
+              >
+                上一页
+              </button>
+              
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const page = i + 1;
+                // Show first, last, current, and adjacent pages
+                if (
+                  page === 1 || 
+                  page === totalPages || 
+                  (page >= currentPage - 1 && page <= currentPage + 1)
+                ) {
+                  return (
+                    <button 
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`h-8 w-8 rounded text-xs font-bold transition-all ${
+                        currentPage === page 
+                          ? 'bg-brand-primary text-white shadow-sm shadow-brand-primary/20' 
+                          : 'border border-border bg-white text-text-secondary hover:text-brand-primary'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                }
+                
+                // Show ellipsis
+                if (page === currentPage - 2 || page === currentPage + 2) {
+                  return <span key={`ellipsis-${page}`} className="text-slate-400">...</span>;
+                }
+                
+                return null;
+              })}
+
+              <button 
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="h-8 px-3 rounded text-xs font-medium border border-border bg-white text-text-secondary hover:text-brand-primary disabled:opacity-50 disabled:hover:text-text-secondary transition-all"
+              >
+                下一页
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

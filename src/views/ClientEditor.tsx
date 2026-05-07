@@ -22,6 +22,7 @@ import {
   Search
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import Dropdown from '@/src/components/common/Dropdown';
 
 interface ClientEditorProps {
   onBack: () => void;
@@ -186,15 +187,13 @@ export default function ClientEditor({ onBack, clientId }: ClientEditorProps) {
               <div className="space-y-2">
                 <label className="text-xs font-bold text-text-secondary">所属行业</label>
                 <div className="relative">
-                  <select 
-                    className="w-full h-12 px-4 rounded-xl bg-slate-50 border-none focus:ring-2 ring-brand-primary/20 outline-none font-medium appearance-none"
+                  <Dropdown 
+                    buttonClassName="h-12 bg-slate-50 border-none hover:bg-slate-100 px-4"
                     value={formData.industry}
-                    onChange={e => setFormData({ ...formData, industry: e.target.value })}
-                  >
-                    <option value="">请选择所属行业</option>
-                    {industries.map(i => <option key={i} value={i}>{i}</option>)}
-                  </select>
-                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    onChange={val => setFormData({ ...formData, industry: val })}
+                    options={industries.map(i => ({ label: i, value: i }))}
+                    placeholder="请选择所属行业"
+                  />
                 </div>
               </div>
 
@@ -268,13 +267,12 @@ export default function ClientEditor({ onBack, clientId }: ClientEditorProps) {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-text-secondary">来源渠道</label>
-                    <select 
-                      className="w-full h-12 px-4 rounded-xl bg-slate-50 border-none focus:ring-2 ring-brand-primary/20 outline-none font-medium appearance-none"
+                    <Dropdown 
+                      buttonClassName="h-12 bg-slate-50 border-none hover:bg-slate-100 px-4"
                       value={formData.source}
-                      onChange={e => setFormData({ ...formData, source: e.target.value })}
-                    >
-                      {sources.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                      onChange={val => setFormData({ ...formData, source: val })}
+                      options={sources.map(s => ({ label: s, value: s }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-text-secondary">备注说明</label>

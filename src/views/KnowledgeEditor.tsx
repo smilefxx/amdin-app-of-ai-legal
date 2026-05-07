@@ -15,7 +15,8 @@ import {
   X,
   Sparkles,
   Link as LinkIcon,
-  BookOpen
+  BookOpen,
+  CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -51,19 +52,32 @@ export default function KnowledgeEditor({ onBack, initialData }: KnowledgeEditor
     // Simulate saving
     setShowSuccess(true);
     setTimeout(() => {
+      setShowSuccess(false);
       onBack();
-    }, 2000);
+    }, 2500);
   };
 
   const handleAiOptimize = () => {
+    if (!content) return;
     setIsAiProcessing(true);
     setTimeout(() => {
       setIsAiProcessing(false);
+      
       // Mock AI optimization
       if (!title.includes('AI 增强')) {
-        setTitle(title + ' (AI 增强解析)');
+        setTitle(title + ' (AI 深度解析版)');
       }
-    }, 1500);
+      
+      const aiResponse = `【AI 核心摘要提炼】\n当前知识条目提取核心要点如下：\n- 适用场景：高频诉讼、风险防范审核\n- 关键争议点：条款的精确解释、适用范围界定\n\n【实践导向建议】\n1. 建议在关联协议版本中设置专门的除外条款。\n2. 建议引用本法条作为争议解决核心依据，并补充补充协议。\n\n------------------------------\n【原始知识沉淀】\n${content}\n\n------------------------------\n【关联知识推荐】\n- 《最高人民法院最新会议纪要》\n- 律所内部类似指导案例库（关联12件）`;
+
+      setContent(aiResponse);
+      
+      setTags(prev => {
+        const newTags = ['AI优化', '核心提炼'];
+        return Array.from(new Set([...prev, ...newTags]));
+      });
+
+    }, 2000);
   };
 
   return (
@@ -265,17 +279,20 @@ export default function KnowledgeEditor({ onBack, initialData }: KnowledgeEditor
        <AnimatePresence>
         {showSuccess && (
           <motion.div 
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-4 bg-brand-deep text-white rounded-2xl shadow-2xl"
+            initial={{ opacity: 0, scale: 0.9, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 50 }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-4 px-6 py-4 bg-slate-900 border border-slate-700 text-white rounded-2xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] backdrop-blur-md"
           >
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-emerald-400">
-               <Save size={18} />
+            <div className="relative flex">
+               <div className="absolute inset-0 bg-emerald-500 rounded-full blur animate-pulse" />
+               <div className="relative w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-400">
+                  <CheckCircle2 size={24} />
+               </div>
             </div>
             <div>
-              <p className="text-sm font-bold">知识资产存入成功</p>
-              <p className="text-[10px] text-white/60">律所知识中枢已更新，正在返回...</p>
+              <p className="text-sm font-bold tracking-wide">知识资产已安全存入库</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">AI 服务正在后台构建向量索引，即将自动返回...</p>
             </div>
           </motion.div>
         )}

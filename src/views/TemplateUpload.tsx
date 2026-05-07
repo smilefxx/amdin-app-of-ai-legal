@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef, ChangeEvent, DragEvent, FormEvent } from 'react';
+import { useState, useRef, ChangeEvent, DragEvent, FormEvent, useEffect } from 'react';
 import { 
   X, 
   Upload, 
@@ -15,13 +15,16 @@ import {
   Trash2,
   AlertCircle,
   FileUp,
-  ChevronDown
+  ChevronDown,
+  Check
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface TemplateUploadProps {
   onBack: () => void;
 }
+
+import Dropdown from '@/src/components/common/Dropdown';
 
 export default function TemplateUpload({ onBack }: TemplateUploadProps) {
   const [files, setFiles] = useState<File[]>([]);
@@ -35,6 +38,12 @@ export default function TemplateUpload({ onBack }: TemplateUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = ['人力资源', '公司治理', '商事贸易', '金融借贷', '房地产', '知识产权', '合规风控'];
+  const categoryOptions = categories.map(c => ({ label: c, value: c }));
+  const riskOptions = [
+    { label: '低风险 (标准化程度高)', value: 'low' },
+    { label: '中风险 (需律师介入微调)', value: 'medium' },
+    { label: '高风险 (涉及重大合规点)', value: 'high' }
+  ];
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -159,31 +168,19 @@ export default function TemplateUpload({ onBack }: TemplateUploadProps) {
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-text-secondary uppercase">业务分类</label>
-                <div className="relative">
-                  <select 
-                    className="w-full h-12 px-4 rounded-xl bg-slate-50 border-none focus:ring-2 ring-brand-primary/20 outline-none font-medium appearance-none"
-                    value={formData.category}
-                    onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  >
-                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <Dropdown 
+                  value={formData.category}
+                  onChange={(val) => setFormData({ ...formData, category: val })}
+                  options={categoryOptions}
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold text-text-secondary uppercase">风控预评级</label>
-                <div className="relative">
-                  <select 
-                    className="w-full h-12 px-4 rounded-xl bg-slate-50 border-none focus:ring-2 ring-brand-primary/20 outline-none font-medium appearance-none"
-                    value={formData.riskLevel}
-                    onChange={e => setFormData({ ...formData, riskLevel: e.target.value })}
-                  >
-                    <option value="low">低风险 (标准化程度高)</option>
-                    <option value="medium">中风险 (需律师介入微调)</option>
-                    <option value="high">高风险 (涉及重大合规点)</option>
-                  </select>
-                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                <Dropdown 
+                  value={formData.riskLevel}
+                  onChange={(val) => setFormData({ ...formData, riskLevel: val })}
+                  options={riskOptions}
+                />
               </div>
             </div>
 

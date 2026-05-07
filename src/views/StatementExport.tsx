@@ -20,6 +20,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import Dropdown from '@/src/components/common/Dropdown';
 
 interface StatementExportProps {
   onBack: () => void;
@@ -62,21 +63,33 @@ export default function StatementExport({ onBack }: StatementExportProps) {
                  
                  <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-text-light uppercase tracking-wider">周期选择</label>
-                    <select className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-xs outline-none focus:ring-2 ring-brand-primary/20 appearance-none font-bold">
-                       <option>2026年 4月 (本月)</option>
-                       <option>2026年 Q1 季度</option>
-                       <option>2025年 全年</option>
-                       <option>自定义时间范围</option>
-                    </select>
+                    <Dropdown 
+                       buttonClassName="h-10 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-100 text-xs"
+                       value=""
+                       onChange={() => {}}
+                       options={[
+                         { label: "2026年 4月 (本月)", value: "2026年 4月 (本月)" },
+                         { label: "2026年 Q1 季度", value: "2026年 Q1 季度" },
+                         { label: "2025年 全年", value: "2025年 全年" },
+                         { label: "自定义时间范围", value: "自定义时间范围" }
+                       ]}
+                       placeholder="2026年 4月 (本月)"
+                    />
                  </div>
 
                  <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-text-light uppercase tracking-wider">客户属性</label>
-                    <select className="w-full h-10 px-3 bg-slate-50 border border-slate-100 rounded-xl text-xs outline-none focus:ring-2 ring-brand-primary/20 appearance-none font-bold">
-                       <option>全部客户</option>
-                       <option>常年法律顾问类</option>
-                       <option>单笔专项类</option>
-                    </select>
+                    <Dropdown 
+                       buttonClassName="h-10 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-100 text-xs"
+                       value=""
+                       onChange={() => {}}
+                       options={[
+                         { label: "全部客户", value: "全部客户" },
+                         { label: "常年法律顾问类", value: "常年法律顾问类" },
+                         { label: "单笔专项类", value: "单笔专项类" }
+                       ]}
+                       placeholder="全部客户"
+                    />
                  </div>
 
                  <div className="space-y-1.5">

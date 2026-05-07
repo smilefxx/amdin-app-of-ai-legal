@@ -17,6 +17,7 @@ import {
   Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import Dropdown from '@/src/components/common/Dropdown';
 
 interface BillingCreatorProps {
   onBack: () => void;
@@ -88,24 +89,34 @@ export default function BillingCreator({ onBack }: BillingCreatorProps) {
               <div className="space-y-2">
                  <label className="text-[10px] font-bold text-text-light uppercase">结算客户</label>
                  <div className="relative">
-                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <select className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:ring-2 ring-brand-primary/20 appearance-none font-bold">
-                       <option>阿里云计算有限公司</option>
-                       <option>腾讯科技</option>
-                       <option>字节跳动</option>
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <Dropdown 
+                       buttonClassName="h-11 border border-slate-100 bg-slate-50 hover:bg-slate-100"
+                       leftIcon={<User size={16} />}
+                       value=""
+                       onChange={() => {}}
+                       options={[
+                         { label: "阿里云计算有限公司", value: "阿里云计算有限公司" },
+                         { label: "腾讯科技", value: "腾讯科技" },
+                         { label: "字节跳动", value: "字节跳动" }
+                       ]}
+                       placeholder="阿里云计算有限公司"
+                    />
                  </div>
               </div>
               <div className="space-y-2">
                  <label className="text-[10px] font-bold text-text-light uppercase">关联案件/项目</label>
                  <div className="relative">
-                    <FileText size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <select className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:ring-2 ring-brand-primary/20 appearance-none font-bold">
-                       <option>2026-合规治理项目-01</option>
-                       <option>知识产权侵权纠纷(二审)</option>
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <Dropdown 
+                       buttonClassName="h-11 border border-slate-100 bg-slate-50 hover:bg-slate-100"
+                       leftIcon={<FileText size={16} />}
+                       value=""
+                       onChange={() => {}}
+                       options={[
+                         { label: "2026-合规治理项目-01", value: "2026-合规治理项目-01" },
+                         { label: "知识产权侵权纠纷(二审)", value: "知识产权侵权纠纷(二审)" }
+                       ]}
+                       placeholder="2026-合规治理项目-01"
+                    />
                  </div>
               </div>
            </div>

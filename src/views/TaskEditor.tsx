@@ -20,6 +20,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import Dropdown from '@/src/components/common/Dropdown';
 
 interface TaskEditorProps {
   onBack: () => void;
@@ -162,14 +163,12 @@ export default function TaskEditor({ onBack, onSave, taskId, initialDate }: Task
                 <label className="text-xs font-bold text-text-secondary uppercase">优先级</label>
                 <div className="relative">
                   <Flag size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <select 
-                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-slate-50 border-none focus:ring-2 ring-brand-primary/20 outline-none font-medium text-sm appearance-none"
+                  <Dropdown 
+                    buttonClassName="h-12 pr-4 pl-11 bg-slate-50 border-none hover:bg-slate-100"
                     value={formData.priority}
-                    onChange={e => setFormData({ ...formData, priority: e.target.value })}
-                  >
-                    {priorities.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-                  </select>
-                  <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    onChange={val => setFormData({ ...formData, priority: val })}
+                    options={priorities}
+                  />
                 </div>
               </div>
             </div>

@@ -86,17 +86,17 @@ export function DocumentPreviewModal({
                   {title}
                   {status === '审核通过' && (
                     <span className="flex items-center gap-1 text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
-                      <ShieldCheck size={12} /> VERIFIED
+                      <ShieldCheck size={12} /> 已验证
                     </span>
                   )}
                   {status === '草稿' && (
                     <span className="flex items-center gap-1 text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
-                      <AlertTriangle size={12} /> DRAFT
+                      <AlertTriangle size={12} /> 草稿
                     </span>
                   )}
                 </h3>
                 <p className="text-xs text-text-light font-medium mt-0.5 uppercase tracking-widest">
-                  DOCUMENT PREVIEW (HTML RENDER)
+                  文档预览 (网页渲染)
                 </p>
               </div>
             </div>

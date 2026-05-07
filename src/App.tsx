@@ -18,11 +18,14 @@ import IssueDetails from './views/IssueDetails';
 import TodoItems from './views/TodoItems';
 import CaseManagement from './views/CaseManagement';
 import CaseEditor from './views/CaseEditor';
+import CaseDetails from './views/CaseDetails';
 import ClientManagement from './views/ClientManagement';
 import ClientEditor from './views/ClientEditor';
 import ContractTemplates from './views/ContractTemplates';
+import DocumentGenerator from './views/DocumentGenerator';
 import TaskManagement from './views/TaskManagement';
 import TaskEditor from './views/TaskEditor';
+import TaskDetails from './views/TaskDetails';
 import TaskCalendar from './views/TaskCalendar';
 import MemberManagement from './views/MemberManagement';
 import MemberEditor from './views/MemberEditor';
@@ -51,10 +54,14 @@ import { UserRole } from './types';
 export default function App() {
   const [role, setRole] = useState<UserRole>(UserRole.FIRM_ADMIN);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [selectedGeneratorTemplate, setSelectedGeneratorTemplate] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [selectedKnowledge, setSelectedKnowledge] = useState<any>(null);
+  const [selectedClientSearch, setSelectedClientSearch] = useState<string>('');
   const [tickets, setTickets] = useState([
     { id: 'TK-10023', title: '文书预览显示 HTML 源码', type: '系统异常', priority: 'high', status: 'pending', user: '张三律师', createdAt: '2026-05-01 10:20', content: '在预览合同范本时，系统没有渲染 PDF，而是直接显示了 HTML 标签。', replies: [] },
     { id: 'TK-10024', title: '会员费用余额无法同步', type: '支付问题', priority: 'medium', status: 'processing', user: '某某律师事务所', createdAt: '2026-05-01 09:15', content: '我们刚充值了 5000 元，但是账户余额显示的还是充值前的金额。', replies: [{ user: '客服小王', content: '正在为您核实银行流水，请稍等。', time: '2026-05-01 11:30' }] },
@@ -161,6 +168,8 @@ export default function App() {
       case 'knowledge_editor': return '专业知识录入';
       case 'knowledge_discovery': return 'AI 知识发现';
       case 'case_editor': return '案件卷宗录入/编辑';
+      case 'case_editor_edit': return '案件卷宗录入/编辑';
+      case 'case_details': return '案件详情';
       case 'client_editor': return '客户档案录入/编辑';
       case 'firm_cases': return '案件与文书';
       case 'firm_members': return '团队成员管理';
@@ -177,6 +186,7 @@ export default function App() {
       case 'category_management': return '合同分类管理';
       case 'firm_tasks': return '团队协作任务';
       case 'task_editor': return '任务发布与编辑';
+      case 'task_details': return '任务详情与协作';
       case 'task_calendar': return '团队日程全景';
       case 'firm_compliance': return '合规性预检';
       case 'billing_plans': return '套餐方案管理';
@@ -206,23 +216,44 @@ export default function App() {
         {activeTab === 'dashboard' && <Dashboard role={role} onNavigate={setActiveTab} />}
         {(activeTab === 'platform_templates' || activeTab === 'firm_templates') && (
           <TemplateLibrary 
-            onEdit={(tmpl) => setActiveTab('template_editor')} 
+            onEdit={(tmpl) => {
+              setSelectedTemplate(tmpl);
+              setActiveTab('template_editor');
+            }} 
             onNavigate={setActiveTab}
           />
         )}
         {activeTab === 'template_editor' && (
-          <TemplateEditor onBack={() => setActiveTab(role === UserRole.PLATFORM_ADMIN ? 'platform_templates' : 'firm_templates')} />
+          <TemplateEditor 
+            template={selectedTemplate}
+            onBack={() => setActiveTab(role === UserRole.PLATFORM_ADMIN ? 'platform_templates' : 'firm_templates')} 
+          />
         )}
         {activeTab === 'todos' && <TodoItems onBack={() => setActiveTab('dashboard')} />}
-        {activeTab === 'firm_cases' && <CaseManagement onNavigate={setActiveTab} />}
+        {activeTab === 'firm_cases' && <CaseManagement onNavigate={setActiveTab} initialSearchTerm={selectedClientSearch} />}
         {activeTab === 'case_editor' && (
           <CaseEditor onBack={() => setActiveTab('firm_cases')} />
         )}
-        {activeTab === 'firm_clients' && <ClientManagement onNavigate={setActiveTab} />}
+        {activeTab === 'case_editor_edit' && (
+          <CaseEditor onBack={() => setActiveTab('case_details')} caseId="mock-case-id" />
+        )}
+        {activeTab === 'case_details' && (
+          <CaseDetails onBack={() => setActiveTab('firm_cases')} onNavigate={setActiveTab} />
+        )}
+        {activeTab === 'firm_clients' && <ClientManagement onNavigate={setActiveTab} onViewClientCases={(clientName) => {
+          setSelectedClientSearch(clientName);
+          setActiveTab('firm_cases');
+        }} />}
         {activeTab === 'client_editor' && (
           <ClientEditor onBack={() => setActiveTab('firm_clients')} />
         )}
-        {activeTab === 'firm_contracts' && <ContractTemplates onNavigate={setActiveTab} />}
+        {activeTab === 'firm_contracts' && <ContractTemplates onNavigate={setActiveTab} onSelectTemplate={setSelectedGeneratorTemplate} />}
+        {activeTab === 'document_generator' && (
+          <DocumentGenerator 
+            onBack={() => setActiveTab('firm_contracts')} 
+            templateName={selectedGeneratorTemplate || undefined} 
+          />
+        )}
         {activeTab === 'template_upload' && (
           <TemplateUpload onBack={() => setActiveTab('firm_contracts')} />
         )}
@@ -245,6 +276,9 @@ export default function App() {
             onSave={handleAddTask}
             initialDate={selectedDate || undefined}
           />
+        )}
+        {activeTab === 'task_details' && (
+          <TaskDetails onBack={() => setActiveTab('firm_tasks')} onNavigate={setActiveTab} />
         )}
         {activeTab === 'task_calendar' && (
           <TaskCalendar 
@@ -322,13 +356,22 @@ export default function App() {
         )}
         {activeTab === 'firm_knowledge' && (
           <KnowledgeBase 
-            onAdd={() => setActiveTab('knowledge_editor')} 
-            onEdit={(item) => setActiveTab('knowledge_editor')}
+            onAdd={() => {
+              setSelectedKnowledge(null);
+              setActiveTab('knowledge_editor');
+            }} 
+            onEdit={(item) => {
+              setSelectedKnowledge(item);
+              setActiveTab('knowledge_editor');
+            }}
             onNavigate={setActiveTab}
           />
         )}
         {activeTab === 'knowledge_editor' && (
-          <KnowledgeEditor onBack={() => setActiveTab('firm_knowledge')} />
+          <KnowledgeEditor 
+            initialData={selectedKnowledge}
+            onBack={() => setActiveTab('firm_knowledge')} 
+          />
         )}
         {activeTab === 'knowledge_discovery' && (
           <KnowledgeDiscovery 
@@ -378,7 +421,7 @@ export default function App() {
 
         {![
           'dashboard', 'users', 'firms', 'platform_templates', 'firm_templates', 'template_editor',
-          'firm_knowledge', 'knowledge_editor', 'knowledge_discovery', 'firm_cases', 'case_editor',
+          'firm_knowledge', 'knowledge_editor', 'knowledge_discovery', 'firm_cases', 'case_editor', 'case_details', 'case_editor_edit',
           'firm_clients', 'client_editor', 'firm_contracts', 'template_upload', 'category_management',
           'firm_tasks', 'task_editor', 'task_calendar', 'firm_members', 'member_details', 'member_editor',
           'member_permissions', 'permission_management', 'firm_compliance', 'compliance_uploader',

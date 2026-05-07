@@ -75,10 +75,10 @@ const TREND_DATA = [
 ];
 
 const CATEGORY_DATA = [
-  { name: '商事合同', value: 400, color: '#2563EB' },
-  { name: '民事诉讼', value: 300, color: '#6366F1' },
-  { name: '知产纠纷', value: 300, color: '#10B981' },
-  { name: '其他业务', value: 200, color: '#CBD5E1' },
+  { name: '商事合同', value: 400, color: '#3A68F8' }, // bg-blue-600 ish
+  { name: '民事诉讼', value: 300, color: '#7C3AED' }, // bg-violet-600 ish
+  { name: '知产纠纷', value: 300, color: '#10B981' }, // bg-emerald-500 ish
+  { name: '其他业务', value: 200, color: '#CBD5E1' }, // bg-slate-300 ish
 ];
 
 const container = {
@@ -100,6 +100,14 @@ export default function Dashboard({ role, onNavigate }: DashboardProps) {
   const [trendView, setTrendView] = useState<'weekly' | 'monthly'>('weekly');
   const stats = role === UserRole.FIRM_ADMIN ? STATS_FIRM : STATS_PLATFORM;
   const isFirm = role === UserRole.FIRM_ADMIN;
+
+  const activeTrendData = trendView === 'weekly' ? TREND_DATA : [
+    { name: 'Jan', active: 1200, total: 3400 },
+    { name: 'Feb', active: 1800, total: 3800 },
+    { name: 'Mar', active: 1600, total: 4200 },
+    { name: 'Apr', active: 2200, total: 5100 },
+    { name: 'May', active: 2500, total: 5600 },
+  ];
 
   return (
     <motion.div 
@@ -135,7 +143,10 @@ export default function Dashboard({ role, onNavigate }: DashboardProps) {
             <div className="w-8 h-8 rounded-full border-2 border-white bg-brand-primary text-white flex items-center justify-center text-[10px] font-bold">+5</div>
           </div>
           <div className="h-8 w-px bg-slate-200 mx-2"></div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-brand-deep uppercase tracking-widest shadow-sm hover:shadow-md transition-all">
+          <button 
+            onClick={() => onNavigate('task_calendar')}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-brand-deep uppercase tracking-widest shadow-sm hover:shadow-md active:scale-95 transition-all"
+          >
             <Calendar size={14} className="text-brand-primary" />
             2026.05.05
           </button>
@@ -148,7 +159,8 @@ export default function Dashboard({ role, onNavigate }: DashboardProps) {
           <motion.div 
             key={stat.id} 
             variants={item}
-            className="card p-8 flex flex-col gap-6 group cursor-pointer transition-all border-slate-100 shadow-premium overflow-hidden relative hover:border-slate-200"
+            onClick={() => onNavigate('analytics')}
+            className="card p-8 flex flex-col gap-6 group cursor-pointer transition-all border-slate-100 shadow-premium overflow-hidden relative hover:border-slate-200 hover:-translate-y-1"
           >
             {/* Background Glow */}
             <div className="absolute -right-6 -top-6 w-24 h-24 blur-3xl opacity-0 group-hover:opacity-40 transition-opacity duration-700 bg-slate-200" />
@@ -200,7 +212,7 @@ export default function Dashboard({ role, onNavigate }: DashboardProps) {
           
           <div className="h-[320px] w-full relative z-10">
              <ResponsiveContainer width="100%" height="100%">
-               <AreaChart data={TREND_DATA} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+               <AreaChart data={activeTrendData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                  <defs>
                    <linearGradient id="colorWave" x1="0" y1="0" x2="0" y2="1">
                      <stop offset="5%" stopColor="#64748B" stopOpacity={0.4}/>
@@ -310,31 +322,37 @@ export default function Dashboard({ role, onNavigate }: DashboardProps) {
       {/* Secondary Dashboard Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Case Categories Pie Chart */}
-        <motion.div variants={item} className="card p-8 md:p-10 border-slate-100 shadow-strong relative overflow-hidden">
-          <div className="flex items-center justify-between mb-8">
+        <motion.div variants={item} className="card bg-white p-8 md:p-10 border-slate-100 shadow-sm relative overflow-hidden backdrop-blur-md rounded-[32px]">
+          <div className="flex flex-col md:flex-row md:items-start justify-between mb-10 gap-4">
             <div>
-              <h3 className="text-xl font-serif font-black text-brand-deep tracking-tight flex items-center gap-2">
-                <Target size={24} className="text-brand-primary" />
+              <h3 className="text-[22px] font-black text-slate-800 tracking-tight flex items-center gap-2 mb-1">
+                <Target size={26} className="text-slate-700" strokeWidth={2.5} />
                 案件种类分析
               </h3>
-              <p className="text-xs text-text-light font-medium mt-1">律所各业务板块案源与营收占比分布</p>
+              <p className="text-xs text-slate-400 font-bold">律所各业务板块案源与营收占比分布</p>
             </div>
-            <button className="text-xs font-bold text-brand-primary hover:text-brand-deep transition-colors">查看详细报表</button>
+            <button 
+              onClick={() => onNavigate('analytics')}
+              className="px-5 py-2.5 bg-slate-800 text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:shadow-xl hover:shadow-slate-800/20 hover:-translate-y-0.5 active:scale-95 transition-all mt-2 md:mt-0 flex items-center gap-2 group"
+            >
+              查看详细报表 
+              <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
           
-          <div className="flex flex-col md:flex-row items-center gap-8 h-[260px]">
-            <div className="w-[260px] h-full relative shrink-0">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-8 h-[240px]">
+            <div className="w-[240px] h-[240px] relative shrink-0">
                <ResponsiveContainer width="100%" height="100%">
                  <PieChart>
                    <Pie
                      data={CATEGORY_DATA}
                      cx="50%"
                      cy="50%"
-                     innerRadius={75}
-                     outerRadius={105}
-                     paddingAngle={6}
+                     innerRadius={78}
+                     outerRadius={108}
+                     paddingAngle={8}
                      dataKey="value"
-                     cornerRadius={12}
+                     cornerRadius={16}
                      stroke="none"
                    >
                      {CATEGORY_DATA.map((entry, index) => (
@@ -348,21 +366,21 @@ export default function Dashboard({ role, onNavigate }: DashboardProps) {
                  </PieChart>
                </ResponsiveContainer>
                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                 <span className="text-2xl font-mono font-black text-brand-deep">1.2K</span>
-                 <span className="text-[10px] font-bold text-text-light uppercase tracking-widest mt-1">总案量</span>
+                 <span className="text-[28px] font-black text-slate-800 tracking-tight">1.2K</span>
+                 <span className="text-xs font-bold text-slate-400 mt-0.5">总案量</span>
                </div>
             </div>
             
-            <div className="flex-1 w-full space-y-4">
+            <div className="flex-1 w-full space-y-5 px-4 md:px-0">
               {CATEGORY_DATA.map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between group cursor-default">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-md" style={{ backgroundColor: item.color }}></div>
-                    <span className="text-sm font-bold text-slate-700 group-hover:text-brand-deep transition-colors">{item.name}</span>
-                  </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-sm font-mono font-bold text-slate-500">{item.value}件</span>
-                    <span className="text-xs font-bold w-12 text-right" style={{ color: item.color }}>{((item.value / 1200) * 100).toFixed(1)}%</span>
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                    <span className="text-[15px] font-bold text-slate-700">{item.name}</span>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <span className="text-[15px] font-bold text-slate-500 whitespace-nowrap">{item.value}件</span>
+                    <span className="text-sm font-bold w-12 text-right" style={{ color: item.color }}>{((item.value / 1200) * 100).toFixed(1)}%</span>
                   </div>
                 </div>
               ))}
@@ -384,12 +402,16 @@ export default function Dashboard({ role, onNavigate }: DashboardProps) {
           
           <div className="space-y-4">
             {[
-              { title: '某互联网公司股权架构审查', time: '逾期 1 天', type: '风险提示', color: 'text-red-600', bg: 'bg-red-50 border-red-100' },
-              { title: '李某与王某借贷纠纷二审答辩状', time: '今天 18:00', type: '紧急文书', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-100' },
-              { title: 'A轮融资Term Sheet复核', time: '明天 10:00', type: '紧急待办', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100' },
-              { title: '律所第三季度合规自查报告', time: '剩余 3 天', type: '内部管理', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-100' },
+              { title: '某互联网公司股权架构审查', time: '逾期 1 天', type: '风险提示', color: 'text-red-600', bg: 'bg-red-50 border-red-100', nav: 'firm_tasks' },
+              { title: '李某与王某借贷纠纷二审答辩状', time: '今天 18:00', type: '紧急文书', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-100', nav: 'case_editor' },
+              { title: 'A轮融资Term Sheet复核', time: '明天 10:00', type: '紧急待办', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100', nav: 'firm_contracts' },
+              { title: '律所第三季度合规自查报告', time: '剩余 3 天', type: '内部管理', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-100', nav: 'firm_compliance' },
             ].map((task, i) => (
-              <div key={i} className={`p-4 rounded-2xl border ${task.bg} flex items-center justify-between transition-all hover:scale-[1.01] cursor-pointer`}>
+              <div 
+                key={i} 
+                onClick={() => onNavigate(task.nav)}
+                className={`p-4 rounded-2xl border ${task.bg} flex items-center justify-between transition-all hover:scale-[1.01] cursor-pointer group hover:shadow-md`}
+              >
                 <div className="flex items-center gap-4">
                    <div className={`w-2 h-2 rounded-full ${task.color.replace('text-', 'bg-')}`}></div>
                    <div>
@@ -404,7 +426,7 @@ export default function Dashboard({ role, onNavigate }: DashboardProps) {
                 <div className="flex flex-col items-end xl:hidden mb-1">
                    <span className="text-[10px] font-bold text-slate-500">{task.time}</span>
                 </div>
-                <button className="w-8 h-8 rounded-full bg-white/60 hidden xl:flex items-center justify-center text-slate-400 hover:text-brand-primary hover:bg-white transition-all shadow-sm">
+                <button className="w-8 h-8 rounded-full bg-white/80 hidden xl:flex items-center justify-center text-slate-400 group-hover:text-brand-primary group-hover:bg-white transition-all shadow-sm group-hover:shadow group-hover:-translate-y-0.5">
                   <ArrowUpRight size={16} />
                 </button>
               </div>

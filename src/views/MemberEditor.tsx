@@ -20,6 +20,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import Dropdown from '@/src/components/common/Dropdown';
 
 interface MemberEditorProps {
   onBack: () => void;
@@ -145,27 +146,23 @@ export default function MemberEditor({ onBack, memberId, member, onSave }: Membe
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-text-secondary">角色身份</label>
                       <div className="relative">
-                        <select 
-                          className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none focus:ring-2 ring-brand-primary/20 outline-none font-medium appearance-none"
+                        <Dropdown 
+                          buttonClassName="h-11 px-4 bg-slate-50 border-none hover:bg-slate-100"
                           value={formData.role}
-                          onChange={e => setFormData({ ...formData, role: e.target.value })}
-                        >
-                          {roles.map(r => <option key={r} value={r}>{r}</option>)}
-                        </select>
-                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                          onChange={val => setFormData({ ...formData, role: val })}
+                          options={roles.map(r => ({ label: r, value: r }))}
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-text-secondary">所属部门</label>
                       <div className="relative">
-                        <select 
-                          className="w-full h-11 px-4 rounded-xl bg-slate-50 border-none focus:ring-2 ring-brand-primary/20 outline-none font-medium appearance-none"
+                        <Dropdown 
+                          buttonClassName="h-11 px-4 bg-slate-50 border-none hover:bg-slate-100"
                           value={formData.department}
-                          onChange={e => setFormData({ ...formData, department: e.target.value })}
-                        >
-                          {departments.map(d => <option key={d} value={d}>{d}</option>)}
-                        </select>
-                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                          onChange={val => setFormData({ ...formData, department: val })}
+                          options={departments.map(d => ({ label: d, value: d }))}
+                        />
                       </div>
                     </div>
                   </div>

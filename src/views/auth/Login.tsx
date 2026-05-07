@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { ShieldCheck, Mail, Lock, ArrowRight, UserCheck } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, ArrowRight, UserCheck, Smartphone } from 'lucide-react';
 import { UserRole } from '../../types';
 
 interface LoginProps {
@@ -14,6 +14,8 @@ interface LoginProps {
 }
 
 export default function Login({ onLogin, onGoToRegister }: LoginProps) {
+  const [loginMethod, setLoginMethod] = useState<'password' | 'ca' | 'sms'>('password');
+
   return (
     <div className="min-h-screen flex bg-white">
       {/* Left: Brand Side */}
@@ -74,78 +76,190 @@ export default function Login({ onLogin, onGoToRegister }: LoginProps) {
       </div>
 
       {/* Right: Form Side */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-bg-gray lg:bg-white">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-bg-gray lg:bg-white relative">
         <motion.div 
+          key={loginMethod}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           className="w-full max-w-md space-y-8"
         >
-          <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-bold text-brand-deep">欢迎回归</h2>
-            <p className="text-text-light mt-2">请登录您的管理员控制台</p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-text-secondary">邮箱地址/账号</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="email" 
-                  placeholder="admin@firm.com"
-                  className="w-full h-12 pl-10 pr-4 bg-slate-50 lg:bg-white border border-border rounded-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
-                />
+          {loginMethod === 'password' && (
+            <>
+              <div className="text-center lg:text-left">
+                <h2 className="text-3xl font-bold text-brand-deep">欢迎回归</h2>
+                <p className="text-text-light mt-2">请登录您的管理员控制台</p>
               </div>
-            </div>
 
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-semibold text-text-secondary">登录密码</label>
-                <button className="text-xs text-brand-primary font-medium hover:underline">忘记密码？</button>
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-text-secondary">邮箱地址/账号</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type="email" 
+                      placeholder="admin@firm.com"
+                      className="w-full h-12 pl-10 pr-4 bg-slate-50 lg:bg-white border border-border rounded-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-semibold text-text-secondary">登录密码</label>
+                    <button className="text-xs text-brand-primary font-medium hover:underline">忘记密码？</button>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type="password" 
+                      placeholder="••••••••"
+                      className="w-full h-12 pl-10 pr-4 bg-slate-50 lg:bg-white border border-border rounded-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="password" 
-                  placeholder="••••••••"
-                  className="w-full h-12 pl-10 pr-4 bg-slate-50 lg:bg-white border border-border rounded-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
-                />
+
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="remember" className="w-4 h-4 rounded border-border text-brand-primary focus:ring-brand-primary" />
+                <label htmlFor="remember" className="text-sm text-text-secondary">保持 30 天内自动登录</label>
               </div>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <input type="checkbox" id="remember" className="w-4 h-4 rounded border-border text-brand-primary focus:ring-brand-primary" />
-            <label htmlFor="remember" className="text-sm text-text-secondary">保持 30 天内自动登录</label>
-          </div>
+              <button 
+                onClick={() => onLogin(UserRole.FIRM_ADMIN)}
+                className="w-full btn-primary h-12 justify-center text-lg"
+              >
+                <span>立即登录</span>
+                <ArrowRight size={20} />
+              </button>
+            </>
+          )}
 
-          <button 
-            onClick={() => onLogin(UserRole.FIRM_ADMIN)}
-            className="w-full btn-primary h-12 justify-center text-lg"
-          >
-            <span>立即登录</span>
-            <ArrowRight size={20} />
-          </button>
+          {loginMethod === 'ca' && (
+            <>
+              <div className="text-center lg:text-left mb-8">
+                <h2 className="text-3xl font-bold text-brand-deep">CA 证书登录</h2>
+                <p className="text-text-light mt-2">请插入您的 UKey 完成身份验证</p>
+              </div>
+              
+              <div className="border border-slate-200 rounded-xl bg-slate-50 p-8 flex flex-col items-center justify-center space-y-4 shadow-inner">
+                <div className="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mb-4">
+                  <UserCheck size={36} className="text-brand-primary" />
+                </div>
+                <p className="text-sm font-semibold text-brand-deep">正在检测 CA 证书环境...</p>
+                <div className="w-full max-w-[200px] h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ x: '-100%' }}
+                    animate={{ x: '100%' }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
+                    className="w-full h-full bg-brand-primary rounded-full"
+                  />
+                </div>
+                <p className="text-xs text-text-light mt-2">请确保 UKey 已插入并配置正确</p>
+              </div>
 
-          <div className="relative py-4">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border"></div></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-text-light">快速登录</span></div>
-          </div>
+              <button 
+                onClick={() => onLogin(UserRole.FIRM_ADMIN)}
+                className="w-full btn-primary h-12 justify-center text-lg mt-6"
+              >
+                <span>识别证书并登录</span>
+                <ArrowRight size={20} />
+              </button>
+              
+              <button 
+                onClick={() => setLoginMethod('password')}
+                className="w-full text-sm text-slate-500 hover:text-brand-primary mt-4 font-medium"
+              >
+                 返回账号密码登录
+              </button>
+            </>
+          )}
 
-          <div className="flex gap-4">
-            <button className="flex-1 btn-secondary h-11 justify-center">
-              <UserCheck size={18} />
-              <span>CA 证书</span>
-            </button>
-            <button className="flex-1 btn-secondary h-11 justify-center">
-              <span>手机号</span>
-            </button>
-          </div>
+          {loginMethod === 'sms' && (
+            <>
+              <div className="text-center lg:text-left">
+                <h2 className="text-3xl font-bold text-brand-deep">手机快捷登录</h2>
+                <p className="text-text-light mt-2">未注册的手机号将自动创建账号</p>
+              </div>
 
-          <p className="text-center text-sm text-text-light">
-            还没有管理员账号？ 
-            <button onClick={onGoToRegister} className="text-brand-primary font-bold ml-1 hover:underline">立即入驻</button>
-          </p>
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-text-secondary">手机号码</label>
+                  <div className="relative">
+                    <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type="tel" 
+                      placeholder="138 0000 0000"
+                      className="w-full h-12 pl-10 pr-4 bg-slate-50 lg:bg-white border border-border rounded-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-text-secondary">验证码</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="6位验证码"
+                      className="flex-1 h-12 px-4 bg-slate-50 lg:bg-white border border-border rounded-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all text-center tracking-widest text-lg"
+                    />
+                    <button className="h-12 px-4 whitespace-nowrap bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 text-sm font-bold rounded-sm transition-colors">
+                      获取验证码
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => onLogin(UserRole.FIRM_ADMIN)}
+                className="w-full btn-primary h-12 justify-center text-lg mt-8"
+              >
+                <span>登录 / 注册</span>
+                <ArrowRight size={20} />
+              </button>
+              
+              <button 
+                onClick={() => setLoginMethod('password')}
+                className="w-full text-sm text-slate-500 hover:text-brand-primary mt-4 font-medium"
+              >
+                 返回账号密码登录
+              </button>
+            </>
+          )}
+
+          {loginMethod === 'password' && (
+            <>
+              <div className="relative py-4">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border"></div></div>
+                <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-text-light">快速登录</span></div>
+              </div>
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setLoginMethod('ca')}
+                  className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-medium hover:border-brand-primary hover:text-brand-primary hover:bg-brand-primary/5 transition-all active:scale-[0.98] shadow-sm"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                    <UserCheck size={16} />
+                  </div>
+                  <span className="text-sm">CA 证书登录</span>
+                </button>
+                <button 
+                  onClick={() => setLoginMethod('sms')}
+                  className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-medium hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all active:scale-[0.98] shadow-sm"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <Smartphone size={16} />
+                  </div>
+                  <span className="text-sm">手机验证码</span>
+                </button>
+              </div>
+
+              <p className="text-center text-sm text-text-light">
+                还没有管理员账号？ 
+                <button onClick={onGoToRegister} className="text-brand-primary font-bold ml-1 hover:underline">立即入驻</button>
+              </p>
+            </>
+          )}
         </motion.div>
       </div>
     </div>

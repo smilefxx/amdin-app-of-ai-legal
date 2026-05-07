@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { DocumentPreviewModal } from '@/src/components/common/DocumentPreviewModal';
+import Dropdown from '@/src/components/common/Dropdown';
 
 interface CaseEditorProps {
   onBack: () => void;
@@ -32,19 +33,19 @@ export default function CaseEditor({ onBack, caseId }: CaseEditorProps) {
   const [activeStep, setActiveStep] = useState(1);
   const [previewDoc, setPreviewDoc] = useState<{name: string, status: string} | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    caseNo: '',
-    type: '民事诉讼',
-    client: '',
-    opponent: '',
-    tribunal: '',
-    judge: '',
-    registerDate: '',
+    title: caseId ? '某科技公司专利侵权诉讼案' : '',
+    caseNo: caseId ? '2026-MS-0042' : '',
+    type: caseId ? '民事诉讼' : '民事诉讼',
+    client: caseId ? '智创新能科技有限公司' : '',
+    opponent: caseId ? '某科技有限公司' : '',
+    tribunal: caseId ? '深圳市中级人民法院' : '',
+    judge: caseId ? '张明理' : '',
+    registerDate: caseId ? '2026-03-15' : '',
     closingDate: '',
-    amount: '',
+    amount: caseId ? '50000000' : '',
     status: 'active',
-    summary: '',
-    tags: [] as string[]
+    summary: caseId ? '原告（某科技公司）指控我方客户（被告）在最新发布的旗舰智能手机中侵犯了其一项关于屏幕显示技术的发明专利。原告要求停止侵权并索赔人民币5000万元。我方初步判断涉案专利可能存在无效理由，且被告的技术方案与涉案专利相比存在显著差异，属于现有技术抗辩或不侵权。目前准备向国家知识产权局提起专利无效宣告请求，并积极准备一审答辩。' : '',
+    tags: caseId ? ['重大疑难', '知识产权'] : ([] as string[])
   });
 
   const caseTypes = ['民事诉讼', '刑事辩护', '行政诉讼', '非诉业务', '法律顾问', '仲裁案件'];
@@ -163,14 +164,12 @@ export default function CaseEditor({ onBack, caseId }: CaseEditorProps) {
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-text-secondary">案件类型</label>
                       <div className="relative">
-                        <select 
-                          className="w-full h-12 px-4 rounded-xl bg-slate-50 border-none focus:ring-2 ring-brand-primary/20 outline-none font-medium appearance-none cursor-pointer"
+                        <Dropdown 
+                          buttonClassName="h-12 bg-slate-50 border-none hover:bg-slate-100 px-4"
                           value={formData.type}
-                          onChange={e => setFormData({ ...formData, type: e.target.value })}
-                        >
-                          {caseTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                        <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                          onChange={val => setFormData({ ...formData, type: val })}
+                          options={caseTypes.map(t => ({ label: t, value: t }))}
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">

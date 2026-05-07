@@ -43,10 +43,8 @@ interface TaskManagementProps {
 }
 
 export default function TaskManagement({ onNavigate, tasks = [], onToggleTask }: TaskManagementProps) {
-  const [activeBoard, setActiveBoard] = useState<'all' | 'my' | 'delegated' | 'completed'>('all');
+  const [activeBoard, setActiveBoard] = useState<'all' | 'my' | 'delegated' | 'completed' | 'todo' | 'in_progress' | 'blocked'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTaskComments, setSelectedTaskComments] = useState<Task | null>(null);
-  const [newComment, setNewComment] = useState('');
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -55,6 +53,12 @@ export default function TaskManagement({ onNavigate, tasks = [], onToggleTask }:
     let matchesTab = true;
     if (activeBoard === 'completed') {
       matchesTab = task.status === 'completed';
+    } else if (activeBoard === 'todo') {
+      matchesTab = task.status === 'todo';
+    } else if (activeBoard === 'in_progress') {
+      matchesTab = task.status === 'in_progress';
+    } else if (activeBoard === 'blocked') {
+      matchesTab = task.status === 'blocked';
     } else if (activeBoard === 'all') {
       matchesTab = task.status !== 'completed';
     }
@@ -112,9 +116,9 @@ export default function TaskManagement({ onNavigate, tasks = [], onToggleTask }:
       {/* Task Summary Metrics */}
       <div className="flex flex-wrap gap-4">
         {[
-          { label: '待处理', count: tasks.filter(t => t.status === 'todo').length, color: 'bg-slate-500', id: 'all' },
-          { label: '进行中', count: tasks.filter(t => t.status === 'in_progress').length, color: 'bg-blue-500', id: 'all' },
-          { label: '已超期', count: tasks.filter(t => t.status === 'blocked').length, color: 'bg-red-500', id: 'all' },
+          { label: '待处理', count: tasks.filter(t => t.status === 'todo').length, color: 'bg-slate-500', id: 'todo' },
+          { label: '进行中', count: tasks.filter(t => t.status === 'in_progress').length, color: 'bg-blue-500', id: 'in_progress' },
+          { label: '已超期', count: tasks.filter(t => t.status === 'blocked').length, color: 'bg-red-500', id: 'blocked' },
           { label: '本周完成', count: tasks.filter(t => t.status === 'completed').length, color: 'bg-emerald-500', id: 'completed' },
         ].map((m, i) => (
           <div 
@@ -186,7 +190,7 @@ export default function TaskManagement({ onNavigate, tasks = [], onToggleTask }:
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: idx * 0.05 }}
-            onClick={() => onNavigate?.('task_editor')}
+            onClick={() => onNavigate?.('task_details')}
             className="card p-4 group hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer"
           >
             <div className="flex items-start gap-4 flex-1">
@@ -229,7 +233,7 @@ export default function TaskManagement({ onNavigate, tasks = [], onToggleTask }:
                 </div>
                 {task.commentCount > 0 && (
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setSelectedTaskComments(task); }}
+                    onClick={(e) => { e.stopPropagation(); onNavigate?.('task_details'); }}
                     className="flex items-center gap-1 text-text-light hover:text-brand-primary hover:bg-brand-primary/5 p-1 rounded transition-colors"
                   >
                     <MessageSquare size={14} />
@@ -245,7 +249,10 @@ export default function TaskManagement({ onNavigate, tasks = [], onToggleTask }:
                 <button className="p-2 hover:bg-slate-50 rounded-lg text-text-light transition-all">
                   <MoreHorizontal size={16} />
                 </button>
-                <button className="ml-2 w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-text-light hover:bg-brand-primary hover:text-white transition-all">
+                <button 
+                  onClick={() => onNavigate?.('task_details')}
+                  className="ml-2 w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-text-light hover:bg-brand-primary hover:text-white transition-all shadow-sm"
+                >
                   <ChevronRight size={18} />
                 </button>
               </div>
@@ -271,89 +278,6 @@ export default function TaskManagement({ onNavigate, tasks = [], onToggleTask }:
         </div>
       </div>
 
-      {/* Comments Slide-over Modal */}
-      <AnimatePresence>
-        {selectedTaskComments && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedTaskComments(null)}
-              className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40"
-            />
-            <motion.div 
-              initial={{ opacity: 0, x: '100%' }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-full md:w-[480px] bg-white shadow-2xl z-50 flex flex-col border-l border-border"
-            >
-              <div className="flex items-center justify-between p-6 border-b border-border">
-                <div className="space-y-1">
-                  <h3 className="font-bold text-lg text-brand-deep">任务协作评论</h3>
-                  <p className="text-xs text-text-light line-clamp-1">{selectedTaskComments.title}</p>
-                </div>
-                <button 
-                  onClick={() => setSelectedTaskComments(null)}
-                  className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50">
-                {[
-                  { user: '系统通知', content: '更新了任务状态为：进行中', time: '昨天 14:30', isSystem: true },
-                  { user: '张合伙人', content: '注意：这个客户对细节要求很高，尽量把每个条款的风险说明写清楚。', time: '昨天 15:00' },
-                  { user: '赵助理', content: '收到，我已经把草稿的第一版更新到附件了，请大家审核一下。', time: '今天 09:15' },
-                  { user: selectedTaskComments.assignee.name, content: '目前进度正常，主要风险点已经用高亮标出。', time: '今天 10:30' }
-                ].map((comment, i) => (
-                  <div key={i} className={`flex gap-3 ${comment.isSystem ? 'justify-center' : ''}`}>
-                    {!comment.isSystem && (
-                      <div className="w-8 h-8 rounded-full bg-slate-200 border border-white shadow-sm flex items-center justify-center shrink-0">
-                        <User size={14} className="text-slate-500" />
-                      </div>
-                    )}
-                    <div className={comment.isSystem ? 'text-center' : ''}>
-                      {comment.isSystem ? (
-                        <span className="text-[11px] bg-slate-200/50 text-slate-500 px-3 py-1 rounded-full">{comment.content}</span>
-                      ) : (
-                        <div className="bg-white border border-slate-100 shadow-sm p-3 rounded-2xl rounded-tl-sm space-y-1">
-                          <div className="flex items-center justify-between gap-4">
-                            <span className="text-xs font-bold text-brand-deep">{comment.user}</span>
-                            <span className="text-[10px] text-text-light">{comment.time}</span>
-                          </div>
-                          <p className="text-sm text-text-secondary leading-relaxed">{comment.content}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="p-4 border-t border-border bg-white">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="输入评论或 @ 同事..."
-                    className="flex-1 h-10 px-4 bg-slate-50 border border-slate-200 text-sm rounded-full outline-none focus:ring-2 ring-brand-primary/20 focus:border-brand-primary/50 transition-all"
-                  />
-                  <button 
-                    onClick={() => setNewComment('')}
-                    disabled={!newComment.trim()}
-                    className="w-10 h-10 rounded-full flex items-center justify-center bg-brand-primary text-white disabled:opacity-50 disabled:bg-slate-300 transition-colors"
-                  >
-                    <Send size={16} />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

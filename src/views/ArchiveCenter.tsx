@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
+import Dropdown from '@/src/components/common/Dropdown';
 import { DocumentPreviewModal } from '@/src/components/common/DocumentPreviewModal';
 
 const ARCHIVE_STATS = [
@@ -165,12 +166,18 @@ export default function ArchiveCenter() {
                           <LayoutGrid size={20} />
                        </button>
                     </div>
-                    <select className="h-12 px-4 rounded-2xl bg-slate-50 text-sm font-bold text-brand-deep border-transparent focus:bg-white focus:border-brand-primary outline-none transition-all cursor-pointer">
-                       <option>全部时间</option>
-                       <option>2026年</option>
-                       <option>2025年</option>
-                       <option>2024年</option>
-                    </select>
+                    <Dropdown 
+                       buttonClassName="h-12 w-32 px-4 rounded-2xl bg-slate-50 text-brand-deep font-bold border-none hover:bg-slate-100"
+                       value=""
+                       onChange={() => {}}
+                       options={[
+                         { label: "全部时间", value: "全部时间" },
+                         { label: "2026年", value: "2026年" },
+                         { label: "2025年", value: "2025年" },
+                         { label: "2024年", value: "2024年" }
+                       ]}
+                       placeholder="全部时间"
+                    />
                  </div>
               </div>
            </div>

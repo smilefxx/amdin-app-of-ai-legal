@@ -19,13 +19,13 @@ import {
 import { motion } from 'motion/react';
 import { KnowledgeItem } from '@/src/types';
 
-const MOCK_KNOWLEDGE: KnowledgeItem[] = [
-  { id: '1', title: '民间借贷利息裁判规则 2026', category: '司法解释', tags: ['利息', '民间借贷'], aiEnabled: true, refCount: 156, updatedAt: '2026-04-30' },
-  { id: '2', title: '《民法典》婚姻家庭编最新司法解释', category: '司法解释', tags: ['民法典', '婚姻'], aiEnabled: true, refCount: 2240, updatedAt: '2026-04-28' },
-  { id: '3', title: '金融借款纠纷证据指引(本院口径)', category: '法院口径', tags: ['证据', '金融'], aiEnabled: false, refCount: 89, updatedAt: '2026-04-25' },
-  { id: '4', title: '高院关于限制消费人员执行指引', category: '办案指引', tags: ['执行', '限高'], aiEnabled: true, refCount: 412, updatedAt: '2026-04-20' },
-  { id: '5', title: '常见律师函催收话术(内部沉淀)', category: '内部经验', tags: ['律师函', '话术'], aiEnabled: true, refCount: 56, updatedAt: '2026-04-15' },
-  { id: '6', title: '保险纠纷监管规则汇编', category: '监管规则', tags: ['保险', '监管'], aiEnabled: true, refCount: 120, updatedAt: '2026-04-12' },
+const MOCK_KNOWLEDGE: KnowledgeItem[] & { content?: string }[] = [
+  { id: '1', title: '民间借贷利息裁判规则 2026', category: '司法解释', tags: ['利息', '民间借贷'], aiEnabled: true, refCount: 156, updatedAt: '2026-04-30', content: '最高人民法院关于审理民间借贷案件适用法律若干问题的规定...\n\n1. 约定的利率未超过合同成立时一年期贷款市场报价利率四倍的，人民法院应予支持。\n2. 借贷双方对前期借款本息结算后将利息计入后期借款本金并重新出具债权凭证的，前期利率没有超过年利率24%...' },
+  { id: '2', title: '《民法典》婚姻家庭编最新司法解释', category: '司法解释', tags: ['民法典', '婚姻'], aiEnabled: true, refCount: 2240, updatedAt: '2026-04-28', content: '关于适用《中华人民共和国民法典》婚姻家庭编的解释（一）\n\n一、一般规定\n条文：...\n二、结婚条款解析...\n对于涉及夫妻共同重大家庭财产分配的诉讼...' },
+  { id: '3', title: '金融借款纠纷证据指引(本院口径)', category: '法院口径', tags: ['证据', '金融'], aiEnabled: false, refCount: 89, updatedAt: '2026-04-25', content: '本市法院对于金融借款合同纠纷案件的举证要求指引：\n\n1. 必须提交原件核实，特别是针对手写签署的担保合同。\n2. 电子合同需附带电子签名的认证报告材料（例如CA机构证明）。...' },
+  { id: '4', title: '高院关于限制消费人员执行指引', category: '办案指引', tags: ['执行', '限高'], aiEnabled: true, refCount: 412, updatedAt: '2026-04-20', content: '限制高消费执行流程梳理（内部版）\n\n第一步：查询财产线索，申请执行。\n第二步：被执行人未按执行通知书指定的期间履行生效法律文书确定的给付义务的...\n第三步：向法院提交限高申请书及相关依据...' },
+  { id: '5', title: '常见律师函催收话术(内部沉淀)', category: '内部经验', tags: ['律师函', '话术'], aiEnabled: true, refCount: 56, updatedAt: '2026-04-15', content: '高转化律师催收函模板与发函策略：\n\n1. 表述须客观，严禁使用威胁性语言以免造成违规。\n2. 催收企业款项需要重点点明其涉及上下游信用的利害关系。\n3. ...' },
+  { id: '6', title: '保险纠纷监管规则汇编', category: '监管规则', tags: ['保险', '监管'], aiEnabled: true, refCount: 120, updatedAt: '2026-04-12', content: '银保监会最新下发的保险理赔纠纷调解指导方案汇编：\n\n包含：\n- 拒赔争议的重新审核机制\n- 免责条款的明确告知义务认定标准\n- ...' },
 ];
 
 interface KnowledgeBaseProps {

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
+import Dropdown from '@/src/components/common/Dropdown';
 
 const MOCK_USERS = [
   { id: 'U001', name: '李大为', role: '律所管理员', firm: '正大联合律师事务所', email: 'li.dw@firm.com', phone: '13812345678', status: 'active', lastLogin: '10分钟前' },
@@ -61,16 +62,28 @@ export default function UserManagement() {
                   />
                </div>
                <div className="flex items-center gap-2">
-                  <select className="h-12 px-4 rounded-2xl bg-slate-50 text-sm font-bold text-brand-deep border-transparent focus:bg-white focus:border-brand-primary outline-none transition-all cursor-pointer">
-                     <option>全部所属单位</option>
-                     <option>正大联合</option>
-                     <option>金杜上海</option>
-                  </select>
-                  <select className="h-12 px-4 rounded-2xl bg-slate-50 text-sm font-bold text-brand-deep border-transparent focus:bg-white focus:border-brand-primary outline-none transition-all cursor-pointer">
-                     <option>全部角色</option>
-                     <option>律所管理员</option>
-                     <option>合伙人律师</option>
-                  </select>
+                  <Dropdown 
+                    buttonClassName="h-12 w-40 px-4 rounded-2xl bg-slate-50 text-brand-deep font-bold border-none hover:bg-slate-100"
+                    value=""
+                    onChange={() => {}}
+                    options={[
+                      { label: "全部所属单位", value: "全部所属单位" },
+                      { label: "正大联合", value: "正大联合" },
+                      { label: "金杜上海", value: "金杜上海" }
+                    ]}
+                    placeholder="全部所属单位"
+                  />
+                  <Dropdown 
+                    buttonClassName="h-12 w-36 px-4 rounded-2xl bg-slate-50 text-brand-deep font-bold border-none hover:bg-slate-100"
+                    value=""
+                    onChange={() => {}}
+                    options={[
+                      { label: "全部角色", value: "全部角色" },
+                      { label: "律所管理员", value: "律所管理员" },
+                      { label: "合伙人律师", value: "合伙人律师" }
+                    ]}
+                    placeholder="全部角色"
+                  />
                   <button className="btn-secondary h-12 px-5 border-none bg-slate-50">
                     <Filter size={18} />
                   </button>

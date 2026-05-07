@@ -48,12 +48,19 @@ const MOCK_CONTRACTS: ContractTemplate[] = [
 
 interface ContractTemplatesProps {
   onNavigate?: (tab: string) => void;
+  onSelectTemplate?: (templateName: string) => void;
 }
 
-export default function ContractTemplates({ onNavigate }: ContractTemplatesProps) {
+export default function ContractTemplates({ onNavigate, onSelectTemplate }: ContractTemplatesProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('全部');
   const [previewContract, setPreviewContract] = useState<ContractTemplate | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  };
 
   const categories = ['全部', '人力资源', '公司治理', '商事贸易', '金融借贷', '房地产', '知识产权', '合规风控'];
 
@@ -200,10 +207,16 @@ export default function ContractTemplates({ onNavigate }: ContractTemplatesProps
                  <button onClick={() => setPreviewContract(contract)} className="p-2 hover:bg-white hover:shadow-xs rounded-lg text-text-light hover:text-brand-primary transition-all">
                    <Eye size={16} />
                  </button>
-                 <button className="p-2 hover:bg-white hover:shadow-xs rounded-lg text-text-light hover:text-brand-primary transition-all">
+                 <button onClick={() => {
+                   navigator.clipboard.writeText(contract.name);
+                   showToast('合同范本已复制');
+                 }} className="p-2 hover:bg-white hover:shadow-xs rounded-lg text-text-light hover:text-brand-primary transition-all">
                    <Copy size={16} />
                  </button>
-                 <button className="flex items-center gap-1.5 text-xs font-bold text-brand-primary hover:bg-brand-primary/5 px-2 py-1.5 rounded-md transition-colors">
+                 <button onClick={() => {
+                   onSelectTemplate?.(contract.name);
+                   onNavigate?.('document_generator');
+                 }} className="flex items-center gap-1.5 text-xs font-bold text-brand-primary hover:bg-brand-primary/5 px-2 py-1.5 rounded-md transition-colors">
                    <span>使用</span>
                    <ChevronRight size={14} />
                  </button>
@@ -227,6 +240,14 @@ export default function ContractTemplates({ onNavigate }: ContractTemplatesProps
         type="contract"
         status={previewContract?.status === 'published' ? '审核通过' : previewContract?.status === 'draft' ? '草稿' : ''}
       />
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-5">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+          <span className="text-sm font-bold">{toastMsg}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -36,18 +36,19 @@ interface Client {
 }
 
 const MOCK_CLIENTS: Client[] = [
-  { id: '1', name: '上海某实业有限公司', type: 'corporate', status: 'vip', contact: '张总', phone: '138****0011', email: 'zhang@industry.com', caseCount: 8, lastFollowUp: '2026-05-01' },
-  { id: '2', name: '李晓明', type: 'individual', status: 'active', contact: '本人', phone: '139****2233', email: 'xiaoming@foxmail.com', caseCount: 2, lastFollowUp: '2026-05-02' },
-  { id: '3', name: '北京某教育科技集团', type: 'corporate', status: 'active', contact: '王经理', phone: '010-88**9900', email: 'wang@edu-tech.cn', caseCount: 15, lastFollowUp: '2026-04-30' },
-  { id: '4', name: '赵大宝', type: 'individual', status: 'potential', contact: '本人', phone: '150****5566', email: 'dabaozhao@outlook.com', caseCount: 0, lastFollowUp: '2026-05-02' },
-  { id: '5', name: '深圳某贸易商行', type: 'corporate', status: 'inactive', contact: '陈先生', phone: '0755-22**1111', email: 'chen@trade-sz.com', caseCount: 4, lastFollowUp: '2025-12-20' },
+  { id: '1', name: '上海某科技有限公司', type: 'corporate', status: 'vip', contact: '张总', phone: '138****0011', email: 'zhang@industry.com', caseCount: 8, lastFollowUp: '2026-05-01' },
+  { id: '2', name: '张三', type: 'individual', status: 'active', contact: '本人', phone: '139****2233', email: 'zhangsan@foxmail.com', caseCount: 2, lastFollowUp: '2026-05-02' },
+  { id: '3', name: '某房地产有限公司', type: 'corporate', status: 'active', contact: '王经理', phone: '010-88**9900', email: 'wang@estate.cn', caseCount: 15, lastFollowUp: '2026-04-30' },
+  { id: '4', name: '陈某', type: 'individual', status: 'potential', contact: '本人', phone: '150****5566', email: 'chenmou@outlook.com', caseCount: 0, lastFollowUp: '2026-05-02' },
+  { id: '5', name: '王五', type: 'individual', status: 'inactive', contact: '本人', phone: '0755-22**1111', email: 'wangwu@qq.com', caseCount: 4, lastFollowUp: '2025-12-20' },
 ];
 
 interface ClientManagementProps {
   onNavigate?: (tab: string) => void;
+  onViewClientCases?: (clientName: string) => void;
 }
 
-export default function ClientManagement({ onNavigate }: ClientManagementProps) {
+export default function ClientManagement({ onNavigate, onViewClientCases }: ClientManagementProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'individual' | 'corporate'>('all');
 
@@ -224,7 +225,7 @@ export default function ClientManagement({ onNavigate }: ClientManagementProps) 
                    <span className="text-[10px] text-text-light">负责律师: 刘德华 等</span>
                 </div>
                 <button 
-                  onClick={() => onNavigate?.('firm_cases')}
+                  onClick={() => onViewClientCases?.(client.name)}
                   className="flex items-center gap-1 text-[10px] font-bold text-brand-primary hover:bg-brand-primary/5 px-2 py-1 rounded transition-colors"
                 >
                   <span>查看全案卷宗</span>

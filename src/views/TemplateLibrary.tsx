@@ -18,7 +18,8 @@ import {
   Library,
   Star,
   Users,
-  Zap
+  Zap,
+  X
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Template } from '@/src/types';
@@ -38,11 +39,43 @@ interface TemplateLibraryProps {
 }
 
 export default function TemplateLibrary({ onEdit, onNavigate }: TemplateLibraryProps) {
+  const [templates, setTemplates] = useState<Template[]>(MOCK_TEMPLATES);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('全部模板');
   const [activeStatus, setActiveStatus] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
   
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
+  const [shareModalTmpl, setShareModalTmpl] = useState<Template | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  };
+
+  const handleDuplicate = (tmpl: Template) => {
+    const newTmpl: Template = {
+      ...tmpl,
+      id: Date.now().toString(),
+      name: `${tmpl.name} (副本)`,
+      status: 'draft',
+      usageCount: 0,
+      version: 'V1.0',
+    };
+    setTemplates(prev => [newTmpl, ...prev]);
+    showToast('模板复制成功');
+  };
+
+  const handleDelete = (id: string) => {
+    setTemplates(prev => prev.filter(t => t.id !== id));
+    showToast('模板已彻底删除');
+  };
+
+  const handleDownload = (tmpl: Template) => {
+    showToast(`《${tmpl.name}》离线包已开始下载`);
+  };
 
   const categories = [
     { name: '全部模板', count: 128 },
@@ -61,13 +94,21 @@ export default function TemplateLibrary({ onEdit, onNavigate }: TemplateLibraryP
     { label: '待审核', value: 'review' }
   ];
 
-  const filteredTemplates = MOCK_TEMPLATES.filter(tmpl => {
+  const filteredTemplates = templates.filter(tmpl => {
     const matchesSearch = tmpl.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          tmpl.type.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = activeCategory === '全部模板' || tmpl.type === activeCategory;
     const matchesStatus = activeStatus === 'all' || tmpl.status === activeStatus;
     return matchesSearch && matchesCategory && matchesStatus;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredTemplates.length / itemsPerPage));
+  const currentTemplates = filteredTemplates.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Reset to first page when filters change
+  if (currentPage > totalPages) {
+      setCurrentPage(1);
+  }
 
   return (
     <div className="flex gap-6 h-full">
@@ -188,8 +229,8 @@ export default function TemplateLibrary({ onEdit, onNavigate }: TemplateLibraryP
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredTemplates.length > 0 ? (
-                filteredTemplates.map((tmpl) => (
+              {currentTemplates.length > 0 ? (
+                currentTemplates.map((tmpl) => (
                   <motion.tr 
                     key={tmpl.id}
                     initial={{ opacity: 0, y: 5 }}
@@ -252,19 +293,28 @@ export default function TemplateLibrary({ onEdit, onNavigate }: TemplateLibraryP
                           </button>
                           <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-border shadow-xl rounded-2xl opacity-0 group-hover/menu:opacity-100 pointer-events-none group-hover/menu:pointer-events-auto transition-all z-50 p-2 border border-slate-100 scale-95 origin-top-right group-hover/menu:scale-100">
                              <button 
-                              onClick={() => onNavigate?.('firm_members')}
+                              onClick={() => setShareModalTmpl(tmpl)}
                               className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-slate-50 flex items-center gap-2 text-text-secondary hover:text-brand-primary transition-colors"
                              >
                                 <Users size={14} /> 共享与权限
                              </button>
-                             <button className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-slate-50 flex items-center gap-2 text-text-secondary hover:text-brand-primary transition-colors">
+                             <button
+                               onClick={() => handleDuplicate(tmpl)}
+                               className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-slate-50 flex items-center gap-2 text-text-secondary hover:text-brand-primary transition-colors"
+                             >
                                 <Copy size={14} /> 复制为新版本
                              </button>
-                             <button className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-slate-50 flex items-center gap-2 text-text-secondary hover:text-brand-primary transition-colors">
+                             <button
+                               onClick={() => handleDownload(tmpl)}
+                               className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-slate-50 flex items-center gap-2 text-text-secondary hover:text-brand-primary transition-colors"
+                             >
                                 <Download size={14} /> 下载离线版
                              </button>
                              <div className="h-[1px] bg-slate-50 my-1 mx-1" />
-                             <button className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-red-50 text-danger flex items-center gap-2 transition-colors">
+                             <button 
+                               onClick={() => handleDelete(tmpl.id)}
+                               className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-red-50 text-danger flex items-center gap-2 transition-colors"
+                             >
                                 <Trash2 size={14} /> 彻底删除
                              </button>
                           </div>
@@ -297,12 +347,23 @@ export default function TemplateLibrary({ onEdit, onNavigate }: TemplateLibraryP
             </tbody>
           </table>
           <div className="px-6 py-4 bg-slate-50/50 border-t border-border flex items-center justify-between">
-            <span className="text-xs text-text-light">累计沉淀模板 128 条，本月已辅助生成 5,820 份专业文书</span>
+            <span className="text-xs text-text-light">累计沉淀模板 128 条，本月已辅助生成 5,820 份专业文书 (共 {filteredTemplates.length} 条)</span>
             <div className="flex items-center gap-2">
-               <button className="px-3 py-1 text-xs border border-border rounded bg-white text-text-light hover:bg-slate-50 disabled:opacity-50">上一页</button>
-               <button className="px-3 py-1 text-xs bg-brand-primary text-white rounded">1</button>
-               <button className="px-3 py-1 text-xs border border-border rounded bg-white text-text-light hover:bg-slate-50">2</button>
-               <button className="px-3 py-1 text-xs border border-border rounded bg-white text-text-light hover:bg-slate-50">下一页</button>
+               <button 
+                 disabled={currentPage === 1}
+                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                 className="px-3 py-1 text-xs border border-border rounded bg-white text-text-light hover:bg-slate-50 disabled:opacity-50"
+               >
+                 上一页
+               </button>
+               <span className="px-3 py-1 text-xs bg-brand-primary text-white rounded">{currentPage} / {totalPages}</span>
+               <button 
+                 disabled={currentPage === totalPages}
+                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                 className="px-3 py-1 text-xs border border-border rounded bg-white text-text-light hover:bg-slate-50 disabled:opacity-50"
+               >
+                 下一页
+               </button>
             </div>
           </div>
         </div>
@@ -315,6 +376,53 @@ export default function TemplateLibrary({ onEdit, onNavigate }: TemplateLibraryP
         type="template"
         status={previewTemplate?.status === 'published' ? '审核通过' : previewTemplate?.status === 'draft' ? '草稿' : ''}
       />
+
+      {/* Share Modal */}
+      {shareModalTmpl && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white max-w-md w-full rounded-3xl overflow-hidden shadow-2xl relative">
+            <div className="p-6">
+              <h3 className="text-lg font-bold text-brand-deep">共享与权限</h3>
+              <p className="text-xs text-text-light mt-1">设置模板《{shareModalTmpl.name}》的可见性</p>
+              
+              <div className="mt-6 space-y-4">
+                 <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/50 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-bold text-brand-deep">律所内公开</p>
+                        <p className="text-[10px] text-text-light">允许所有团队成员查看和使用</p>
+                    </div>
+                    <div className="w-10 h-6 bg-brand-primary rounded-full relative cursor-pointer">
+                        <div className="w-4 h-4 bg-white rounded-full absolute top-1 right-1"></div>
+                    </div>
+                 </div>
+                 <div className="p-4 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-bold text-brand-deep">仅管理员可修改</p>
+                        <p className="text-[10px] text-text-light">保护核心模板不被误编辑</p>
+                    </div>
+                    <div className="w-10 h-6 bg-brand-primary rounded-full relative cursor-pointer">
+                        <div className="w-4 h-4 bg-white rounded-full absolute top-1 right-1"></div>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="mt-8 flex items-center justify-end gap-3">
+                 <button onClick={() => setShareModalTmpl(null)} className="px-5 py-2.5 text-xs text-text-secondary font-bold hover:bg-slate-50 rounded-xl transition-colors">取消</button>
+                 <button onClick={() => { setShareModalTmpl(null); showToast('权限设置已保存'); }} className="px-5 py-2.5 text-xs text-white font-bold bg-brand-primary hover:bg-blue-700 rounded-xl transition-colors">保存设置</button>
+              </div>
+            </div>
+            <button onClick={() => setShareModalTmpl(null)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"><X size={20}/></button>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-5">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+          <span className="text-sm font-bold">{toastMsg}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
+import Dropdown from '@/src/components/common/Dropdown';
 
 const MOCK_FIRMS = [
   { id: 'F001', name: '正大联合律师事务所', scale: '50-100人', contact: '张正大', phone: '13812345678', location: '北京·朝阳区', status: 'active', joinDate: '2025-10-12', docCount: '4.2k' },
@@ -80,11 +81,17 @@ export default function FirmManagement() {
                     <Filter size={18} />
                     <span>筛选</span>
                   </button>
-                  <select className="h-12 px-4 rounded-2xl bg-slate-50 text-sm font-bold text-brand-deep border-transparent focus:bg-white focus:border-brand-primary outline-none transition-all">
-                     <option>按加入时间</option>
-                     <option>按文书量</option>
-                     <option>按规模</option>
-                  </select>
+                  <Dropdown
+                    buttonClassName="h-12 w-36 px-4 rounded-2xl bg-slate-50 text-brand-deep font-bold border-none hover:bg-slate-100"
+                    value={[]}
+                    onChange={() => {}}
+                    options={[
+                      { label: "按加入时间", value: "按加入时间" },
+                      { label: "按文书量", value: "按文书量" },
+                      { label: "按规模", value: "按规模" }
+                    ]}
+                    placeholder="按加入时间"
+                  />
                </div>
             </div>
          </div>

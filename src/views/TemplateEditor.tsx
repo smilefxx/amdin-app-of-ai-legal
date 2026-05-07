@@ -37,8 +37,11 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+import Dropdown from '@/src/components/common/Dropdown';
+
 interface TemplateEditorProps {
   onBack: () => void;
+  template?: any;
 }
 
 interface VariableType {
@@ -49,7 +52,7 @@ interface VariableType {
   description?: string;
 }
 
-export default function TemplateEditor({ onBack }: TemplateEditorProps) {
+export default function TemplateEditor({ onBack, template }: TemplateEditorProps) {
   const [activeTab, setActiveTab] = useState('variables');
   const [isPreview, setIsPreview] = useState(false);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -57,9 +60,9 @@ export default function TemplateEditor({ onBack }: TemplateEditorProps) {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   
   const [metadata, setMetadata] = useState({
-    title: '民间借贷起诉状标准版',
-    version: 'V2.1',
-    category: '民事诉讼',
+    title: template?.name || '民间借贷起诉状标准版',
+    version: template?.version || 'V2.1',
+    category: template?.type || '民事诉讼',
     autoSave: true,
     aiEnhance: true
   });
@@ -220,6 +223,7 @@ export default function TemplateEditor({ onBack }: TemplateEditorProps) {
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-brand-deep">{metadata.title}</h2>
               <span className="px-2 py-0.5 bg-brand-primary/10 text-brand-primary text-[10px] font-bold rounded">稳定版 {metadata.version}</span>
+              <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded">{metadata.category}</span>
             </div>
             <p className="text-[10px] text-text-light flex items-center gap-1">
               <History size={10} /> 正在编辑中 · {metadata.autoSave ? '已开启自动保存' : '手动保存模式'}
@@ -699,16 +703,22 @@ export default function TemplateEditor({ onBack }: TemplateEditorProps) {
                     </label>
                     <label className="block">
                       <span className="text-[11px] font-bold text-text-light uppercase tracking-wider mb-2 block">业务分类</span>
-                      <select 
+                      <Dropdown 
                         value={metadata.category}
-                        onChange={(e) => setMetadata({...metadata, category: e.target.value})}
-                        className="w-full h-11 px-4 rounded-xl border border-slate-100 bg-slate-50/50 focus:bg-white focus:border-brand-primary outline-none transition-all text-sm font-medium appearance-none"
-                      >
-                        <option>民事诉讼</option>
-                        <option>刑事辩护</option>
-                        <option>行政审批</option>
-                        <option>内部合同</option>
-                      </select>
+                        onChange={(val) => setMetadata({...metadata, category: val})}
+                        options={[
+                          { label: "民事诉讼", value: "民事诉讼" },
+                          { label: "刑事辩护", value: "刑事辩护" },
+                          { label: "行政审批", value: "行政审批" },
+                          { label: "内部合同", value: "内部合同" },
+                          { label: "民间借贷", value: "民间借贷" },
+                          { label: "保险纠纷", value: "保险纠纷" },
+                          { label: "行政处罚", value: "行政处罚" },
+                          { label: "金融借款", value: "金融借款" },
+                          { label: "担保纠纷", value: "担保纠纷" },
+                          { label: "律师函", value: "律师函" }
+                        ]}
+                      />
                     </label>
                   </div>
                 </div>
