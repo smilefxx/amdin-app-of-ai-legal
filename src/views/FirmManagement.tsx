@@ -83,7 +83,7 @@ export default function FirmManagement() {
                   </button>
                   <Dropdown
                     buttonClassName="h-12 w-36 px-4 rounded-2xl bg-slate-50 text-brand-deep font-bold border-none hover:bg-slate-100"
-                    value={[]}
+                    value=""
                     onChange={() => {}}
                     options={[
                       { label: "按加入时间", value: "按加入时间" },

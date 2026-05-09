@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { 
   CreditCard, 
   Check, 
@@ -11,11 +12,13 @@ import {
   ShieldCheck,
   Zap,
   Globe,
-  Coins
+  Coins,
+  X,
+  Trash2
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
-const PLANS = [
+const INITIAL_PLANS = [
   {
     id: 'base',
     name: '基础文书审查',
@@ -77,6 +80,48 @@ const item = {
 };
 
 export default function BillingPlans() {
+  const [plans, setPlans] = useState(INITIAL_PLANS);
+  const [editingPlan, setEditingPlan] = useState<any>(null);
+
+  const handleEditPlan = (plan: any) => {
+    // Clone deeply to avoid mutating state directly
+    setEditingPlan(JSON.parse(JSON.stringify(plan)));
+  };
+
+  const handleSavePlan = () => {
+    if (!editingPlan) return;
+    setPlans(prev => {
+      const exists = prev.find(p => p.id === editingPlan.id);
+      if (exists) {
+        return prev.map(p => p.id === editingPlan.id ? editingPlan : p);
+      } else {
+        return [...prev, editingPlan];
+      }
+    });
+    setEditingPlan(null);
+  };
+
+  const updateEditingFeature = (index: number, val: string) => {
+    setEditingPlan((prev: any) => {
+      const newFeatures = [...prev.features];
+      newFeatures[index] = val;
+      return { ...prev, features: newFeatures };
+    });
+  };
+
+  const removeEditingFeature = (index: number) => {
+    setEditingPlan((prev: any) => {
+      const newFeatures = prev.features.filter((_: any, i: number) => i !== index);
+      return { ...prev, features: newFeatures };
+    });
+  };
+
+  const addEditingFeature = () => {
+    setEditingPlan((prev: any) => {
+      return { ...prev, features: [...prev.features, ''] };
+    });
+  };
+
   return (
     <motion.div 
       variants={container}
@@ -95,7 +140,17 @@ export default function BillingPlans() {
               <Globe size={14} className="text-brand-primary" />
               全球定价节点: 亚太 (Shanghai)
            </div>
-           <button className="btn-primary bg-brand-deep shadow-strong rounded-xl text-[11px] font-black uppercase tracking-widest px-6 py-3">
+           <button onClick={() => setEditingPlan({
+              id: 'new_' + Date.now(),
+              name: '新订阅方案',
+              price: '0',
+              unit: '起',
+              description: '请描述您的新服务方案',
+              features: ['新的服务权益'],
+              accent: 'brand',
+              featured: false,
+              stats: { users: 0, growth: '+0%' }
+           })} className="btn-primary bg-brand-deep shadow-strong rounded-xl text-[11px] font-black uppercase tracking-widest px-6 py-3">
               <Plus size={16} /> 创建新方案
            </button>
         </div>
@@ -129,7 +184,7 @@ export default function BillingPlans() {
 
       {/* Pricing Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
-        {PLANS.map((plan, idx) => (
+        {plans.map((plan, idx) => (
           <motion.div 
             key={plan.id}
             variants={item}
@@ -181,7 +236,9 @@ export default function BillingPlans() {
             </div>
 
             <div className="space-y-4">
-               <button className={`w-full py-5 rounded-3xl text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 ${
+               <button 
+                 onClick={() => handleEditPlan(plan)}
+                 className={`w-full py-5 rounded-3xl text-xs font-black uppercase tracking-[0.15em] transition-all duration-300 ${
                  plan.featured 
                    ? 'bg-brand-primary text-white hover:bg-brand-deep shadow-2xl shadow-brand-primary/30' 
                    : 'bg-brand-deep text-white hover:bg-slate-800'
@@ -228,6 +285,106 @@ export default function BillingPlans() {
            ))}
         </div>
       </motion.div>
+
+      {/* Edit Plan Modal */}
+      <AnimatePresence>
+        {editingPlan && (
+          <motion.div 
+            className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+             <motion.div 
+                className="bg-white max-w-2xl w-full rounded-[2.5rem] p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar"
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
+             >
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-serif font-black text-brand-deep">编辑套餐详情: {editingPlan.name}</h3>
+                  <button onClick={() => setEditingPlan(null)} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                     <X size={20} className="text-slate-500" />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                   <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                         <label className="text-xs font-bold text-text-light uppercase tracking-wider">套餐名称</label>
+                         <input 
+                            type="text" 
+                            value={editingPlan.name} 
+                            onChange={(e) => setEditingPlan({...editingPlan, name: e.target.value})}
+                            className="w-full h-12 px-4 rounded-2xl border border-slate-200 focus:border-brand-primary outline-none transition-all text-sm font-bold text-brand-deep"
+                         />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-xs font-bold text-text-light uppercase tracking-wider">价格 (¥)</label>
+                         <input 
+                            type="text" 
+                            value={editingPlan.price} 
+                            onChange={(e) => setEditingPlan({...editingPlan, price: e.target.value})}
+                            className="w-full h-12 px-4 rounded-2xl border border-slate-200 focus:border-brand-primary outline-none transition-all text-sm font-bold text-brand-deep"
+                         />
+                      </div>
+                   </div>
+
+                   <div className="space-y-2">
+                      <label className="text-xs font-bold text-text-light uppercase tracking-wider">周期/单位</label>
+                      <input 
+                         type="text" 
+                         value={editingPlan.unit} 
+                         onChange={(e) => setEditingPlan({...editingPlan, unit: e.target.value})}
+                         className="w-full h-12 px-4 rounded-2xl border border-slate-200 focus:border-brand-primary outline-none transition-all text-sm font-bold text-brand-deep"
+                      />
+                   </div>
+
+                   <div className="space-y-2">
+                      <label className="text-xs font-bold text-text-light uppercase tracking-wider">描述</label>
+                      <textarea 
+                         value={editingPlan.description} 
+                         onChange={(e) => setEditingPlan({...editingPlan, description: e.target.value})}
+                         className="w-full h-24 p-4 rounded-2xl border border-slate-200 focus:border-brand-primary outline-none transition-all text-sm resize-none"
+                      />
+                   </div>
+
+                   <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                         <label className="text-xs font-bold text-text-light uppercase tracking-wider">服务权益 (Features)</label>
+                         <button onClick={addEditingFeature} className="text-[10px] font-bold text-brand-primary bg-brand-primary/10 px-3 py-1.5 rounded-full hover:bg-brand-primary/20 transition-colors flex items-center gap-1">
+                            <Plus size={12} /> 新增权益
+                         </button>
+                      </div>
+                      <div className="space-y-3">
+                         {editingPlan.features.map((feature: string, idx: number) => (
+                           <div key={idx} className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                                 <Check size={14} className="text-slate-400" />
+                              </div>
+                              <input 
+                                 type="text" 
+                                 value={feature} 
+                                 onChange={(e) => updateEditingFeature(idx, e.target.value)}
+                                 className="flex-1 h-12 px-4 rounded-2xl border border-slate-200 focus:border-brand-primary outline-none transition-all text-sm"
+                              />
+                              <button onClick={() => removeEditingFeature(idx)} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-red-50 hover:bg-red-100 text-red-500 transition-colors shrink-0">
+                                 <Trash2 size={16} />
+                              </button>
+                           </div>
+                         ))}
+                      </div>
+                   </div>
+                </div>
+
+                <div className="mt-10 flex gap-4">
+                   <button onClick={() => setEditingPlan(null)} className="flex-1 py-4 rounded-2xl font-bold text-text-secondary bg-slate-50 hover:bg-slate-100 transition-colors">取消</button>
+                   <button onClick={handleSavePlan} className="flex-1 py-4 rounded-2xl font-bold text-white bg-brand-primary hover:bg-brand-deep transition-colors shadow-lg shadow-brand-primary/30">保存更改</button>
+                </div>
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

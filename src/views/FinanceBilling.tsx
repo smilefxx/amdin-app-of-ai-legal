@@ -24,7 +24,7 @@ import {
   Calendar,
   DollarSign
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface Transaction {
   id: string;
@@ -48,12 +48,18 @@ const MOCK_TRANSACTIONS: Transaction[] = [
 ];
 
 interface FinanceBillingProps {
-  onNavigate?: (tab: string) => void;
+  onNavigate?: (tab: string, param?: any) => void;
 }
 
 export default function FinanceBilling({ onNavigate }: FinanceBillingProps) {
   const [activeFilter, setActiveFilter] = useState<'all' | 'income' | 'expense' | 'pending'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 2500);
+  };
 
   const filteredTransactions = MOCK_TRANSACTIONS.filter(t => {
     const matchesSearch = t.client.includes(searchTerm) || t.caseTitle.includes(searchTerm) || t.orderNo.includes(searchTerm);
@@ -115,7 +121,9 @@ export default function FinanceBilling({ onNavigate }: FinanceBillingProps) {
             <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/10">
               <Wallet size={20} className="text-brand-primary" />
             </div>
-            <ArrowUpRight size={18} className="text-emerald-400" />
+            <button onClick={() => onNavigate?.('analytics')} className="p-1 -mr-1 text-emerald-400 hover:opacity-80 transition-opacity">
+              <ArrowUpRight size={18} />
+            </button>
           </div>
           <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-1">本月总营收</p>
           <div className="flex items-baseline gap-1">
@@ -128,21 +136,22 @@ export default function FinanceBilling({ onNavigate }: FinanceBillingProps) {
         </div>
 
         {[
-          { label: '待回款金额', value: '184,200', icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50', footer: '共 12 笔待收' },
-          { label: '已超期金额', value: '120,000', icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-50', footer: '需要催收' },
-          { label: '本月行政支出', value: '35, connection800', icon: TrendingDown, color: 'text-slate-600', bg: 'bg-slate-50', footer: '预算内' },
+          { label: '待回款金额', value: '184,200', icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50', footer: '共 12 笔待收', onClick: () => setActiveFilter('pending') },
+          { label: '已超期金额', value: '120,000', icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-50', footer: '需要催收', onClick: () => onNavigate?.('risk') },
+          { label: '本月行政支出', value: '35,800', icon: TrendingDown, color: 'text-slate-600', bg: 'bg-slate-50', footer: '预算内', onClick: () => setActiveFilter('expense') },
         ].map((stat, i) => (
           <div key={i} className="card p-5 flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color}`}>
                 <stat.icon size={20} />
               </div>
-              <button className="text-text-light hover:text-brand-primary">
+              <button onClick={stat.onClick} className="text-text-light hover:text-brand-primary p-1 -mr-1 transition-colors">
                 <ChevronRight size={16} />
               </button>
             </div>
             <div className="mt-4">
               <p className="text-[10px] font-bold text-text-light uppercase tracking-widest mb-1">{stat.label}</p>
+
               <div className="flex items-baseline gap-1">
                 <span className="text-xs font-bold text-text-light">¥</span>
                 <p className="text-xl font-bold text-brand-deep">{stat.value}</p>
@@ -205,6 +214,7 @@ export default function FinanceBilling({ onNavigate }: FinanceBillingProps) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: idx * 0.05 }}
+                    onClick={() => onNavigate?.('order_details', tr.id)}
                     className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
                   >
                      <td className="px-6 py-4">
@@ -237,10 +247,10 @@ export default function FinanceBilling({ onNavigate }: FinanceBillingProps) {
                      </td>
                      <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
-                           <button className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-text-light hover:text-brand-primary transition-all border border-transparent hover:border-border">
+                           <button onClick={(e) => { e.stopPropagation(); onNavigate?.('order_details', tr.id); }} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-text-light hover:text-brand-primary transition-all border border-transparent hover:border-border">
                               <FileText size={16} />
                            </button>
-                           <button className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-text-light hover:text-brand-primary transition-all border border-transparent hover:border-border">
+                           <button onClick={(e) => { e.stopPropagation(); onNavigate?.('billing_creator'); }} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-text-light hover:text-brand-primary transition-all border border-transparent hover:border-border">
                               <MoreHorizontal size={16} />
                            </button>
                         </div>
@@ -297,9 +307,26 @@ export default function FinanceBilling({ onNavigate }: FinanceBillingProps) {
                集成 支付宝/微信/银联 支付接入，支持客户扫描文书二维码直接结账，流水自动对账入库。
              </p>
            </div>
-           <button className="btn-primary h-9 px-6 text-xs shadow-md">立即申请开通</button>
+           <button onClick={() => onNavigate?.('settings')} className="btn-primary h-9 px-6 text-xs shadow-md">立即申请开通</button>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl"
+          >
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <CheckCircle2 size={18} />
+            </div>
+            <p className="font-medium text-sm">{toastMsg}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

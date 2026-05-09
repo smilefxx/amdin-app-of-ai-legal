@@ -75,6 +75,15 @@ export default function TemplateLibrary({ onEdit, onNavigate }: TemplateLibraryP
 
   const handleDownload = (tmpl: Template) => {
     showToast(`《${tmpl.name}》离线包已开始下载`);
+    setTimeout(() => {
+      const element = document.createElement("a");
+      const file = new Blob([`Simulated Offline Template Package\n\nTemplate: ${tmpl.name}\nVersion: ${tmpl.version}\nCategory: ${tmpl.type}`], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = `${tmpl.id}_${tmpl.name}.txt`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 1000);
   };
 
   const categories = [

@@ -33,8 +33,14 @@ export default function IssueDetails({ ticket, members = [], onBack, onResolve, 
   const [replyText, setReplyText] = useState('');
   const [isResolving, setIsResolving] = useState(false);
   const [showDispatch, setShowDispatch] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   if (!ticket) return null;
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  };
 
   const handleResolve = () => {
     setIsResolving(true);
@@ -48,7 +54,21 @@ export default function IssueDetails({ ticket, members = [], onBack, onResolve, 
   const currentAssignee = members.find(m => m.id === ticket.assigneeId);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 relative">
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -10, x: '-50%' }}
+            className="fixed top-8 left-1/2 z-50 px-6 py-3 bg-slate-800 text-white text-sm font-bold rounded-full shadow-2xl flex items-center gap-2 border border-slate-700"
+          >
+            <CheckCircle2 size={16} className="text-emerald-400" />
+            {toastMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -218,14 +238,14 @@ export default function IssueDetails({ ticket, members = [], onBack, onResolve, 
               ></textarea>
               <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-2">
                  <div className="flex items-center gap-3">
-                    <button className="p-2 text-slate-400 hover:text-brand-primary transition-colors">
+                    <button onClick={() => showToast('插入标签功能暂未开放')} className="p-2 text-slate-400 hover:text-brand-primary transition-colors">
                        <Tag size={18} />
                     </button>
-                    <button className="p-2 text-slate-400 hover:text-brand-primary transition-colors">
+                    <button onClick={() => showToast('使用快捷回复暂未开放')} className="p-2 text-slate-400 hover:text-brand-primary transition-colors">
                        <Zap size={18} />
                     </button>
                  </div>
-                 <button className="btn-primary h-10 px-6 gap-2">
+                 <button onClick={() => { showToast('回复发送成功！'); setReplyText(''); }} className="btn-primary h-10 px-6 gap-2">
                     <Send size={16} />
                     发送回复
                  </button>
@@ -264,7 +284,7 @@ export default function IssueDetails({ ticket, members = [], onBack, onResolve, 
               <p className="text-[10px] text-text-secondary leading-relaxed mb-4">
                  根据历史类似工单分析，此 HTML 源码显示问题通常与 Nginx 静态资源映射或 Webpack 打包路径配置有关。
               </p>
-              <button className="w-full py-2 rounded-lg bg-white border border-brand-primary/20 text-[10px] font-bold text-brand-primary hover:bg-brand-primary/5 transition-all">
+              <button onClick={() => showToast('文档调取中...正在跳转至系统运维知识库。')} className="w-full py-2 rounded-lg bg-white border border-brand-primary/20 text-[10px] font-bold text-brand-primary hover:bg-brand-primary/5 transition-all">
                  查阅排障文档
               </button>
            </div>

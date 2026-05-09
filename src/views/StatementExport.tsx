@@ -19,7 +19,7 @@ import {
   Clock,
   ExternalLink
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import Dropdown from '@/src/components/common/Dropdown';
 
 interface StatementExportProps {
@@ -28,6 +28,25 @@ interface StatementExportProps {
 
 export default function StatementExport({ onBack }: StatementExportProps) {
   const [selectedFormat, setSelectedFormat] = useState<'xlsx' | 'pdf'>('xlsx');
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 2500);
+  };
+
+  const handleDownload = () => {
+    showToast(`正在生成 ${selectedFormat.toUpperCase()} 对账单文件并下载...`);
+    setTimeout(() => {
+      const element = document.createElement("a");
+      const file = new Blob(["Simulated " + selectedFormat.toUpperCase() + " Statement Export\n\nGenerated for preview."], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = `LAW_STATEMENT_2026_04.${selectedFormat}`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 1500);
+  };
 
   const previewData = [
     { id: 'BILL-001', client: '腾讯科技(深圳)有限公司', amount: 15600.00, date: '2026-04-20', status: 'paid', type: '诉讼代理' },
@@ -129,7 +148,10 @@ export default function StatementExport({ onBack }: StatementExportProps) {
                  </div>
               </div>
 
-              <button className="w-full h-12 rounded-xl bg-brand-primary text-white font-bold text-sm shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+              <button 
+                onClick={handleDownload}
+                className="w-full h-12 rounded-xl bg-brand-primary text-white font-bold text-sm shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
                  <Download size={18} />
                  开始生成并下载
               </button>
@@ -154,10 +176,10 @@ export default function StatementExport({ onBack }: StatementExportProps) {
                     <span className="text-xs font-bold text-brand-deep">账单预览: LAW_STATEMENT_2026_04.pdf</span>
                  </div>
                  <div className="flex items-center gap-2">
-                    <button className="p-2 h-9 w-9 rounded-lg hover:bg-white text-slate-400 hover:text-brand-primary transition-all">
+                    <button onClick={() => showToast('正在准备打印...')} className="p-2 h-9 w-9 rounded-lg hover:bg-white text-slate-400 hover:text-brand-primary transition-all">
                        <Printer size={16} />
                     </button>
-                    <button className="p-2 h-9 w-9 rounded-lg hover:bg-white text-slate-400 hover:text-brand-primary transition-all">
+                    <button onClick={() => showToast('文档内检索内容功能暂未开放')} className="p-2 h-9 w-9 rounded-lg hover:bg-white text-slate-400 hover:text-brand-primary transition-all">
                        <Search size={16} />
                     </button>
                  </div>
@@ -245,6 +267,23 @@ export default function StatementExport({ onBack }: StatementExportProps) {
            </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl"
+          >
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <CheckCircle2 size={18} />
+            </div>
+            <p className="font-medium text-sm">{toastMsg}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

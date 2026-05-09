@@ -11,7 +11,8 @@ import {
   Briefcase,
   ChevronRight,
   Download,
-  Calendar
+  Calendar,
+  CheckCircle2
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -25,7 +26,7 @@ import {
   Bar,
   Cell
 } from 'recharts';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const TREND_DATA = [
   { name: 'Jan', cases: 45, docs: 120, income: 15.2 },
@@ -75,11 +76,51 @@ function MetricCard({ label, value, trend, icon: Icon, color }: MetricCardProps)
   );
 }
 
-export default function Analytics() {
+interface AnalyticsProps {
+  onNavigate?: (tab: string) => void;
+}
+
+export default function Analytics({ onNavigate }: AnalyticsProps) {
   const [activeTab, setActiveTab] = useState<'income' | 'cases' | 'docs'>('income');
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  };
+
+  const handleExport = () => {
+    showToast('正在为您打包系统数据周报并导出为 PDF，请稍候...');
+    // Simulated export delay
+    setTimeout(() => {
+      const element = document.createElement("a");
+      const file = new Blob(["Simulated Weekly Report Data"], { type: 'application/pdf' });
+      element.href = URL.createObjectURL(file);
+      element.download = "law_firm_weekly_report.pdf";
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      setToastMsg('周报导出完成！');
+      setTimeout(() => setToastMsg(null), 2000);
+    }, 1500);
+  };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-10">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10 relative">
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -10, x: '-50%' }}
+            className="fixed top-8 left-1/2 z-50 px-6 py-3 bg-slate-800 text-white text-sm font-bold rounded-full shadow-2xl flex items-center gap-2 border border-slate-700"
+          >
+            <CheckCircle2 size={16} className="text-emerald-400" />
+            {toastMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -87,11 +128,11 @@ export default function Analytics() {
           <p className="text-sm text-text-light">实时监测律所运行核心指标，基于 AI 进行趋势预测与风险分析</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="btn-secondary h-11 px-6">
+          <button onClick={handleExport} className="btn-secondary h-11 px-6">
             <Download size={18} />
             <span>导出周报</span>
           </button>
-          <button className="btn-primary h-11 px-8 bg-slate-800 hover:bg-slate-700 text-white shadow-xl shadow-slate-800/20 border-none">
+          <button onClick={() => showToast('AI 正在调取最新律所全局业务数据，生成即时优化方案...')} className="btn-primary h-11 px-8 bg-slate-800 hover:bg-slate-700 text-white shadow-xl shadow-slate-800/20 border-none">
             <Zap size={18} />
             <span>AI 即时生成洞察</span>
           </button>
@@ -202,12 +243,12 @@ export default function Analytics() {
                 <h4 className="text-sm font-bold text-text-main mb-6">快捷管理入口</h4>
                 <div className="grid grid-cols-2 gap-4">
                    {[
-                     { label: '案件审批', icon: Zap, color: 'text-slate-500', bg: 'bg-slate-50' },
-                     { label: '薪酬结算', icon: DollarSign, color: 'text-stone-500', bg: 'bg-stone-50' },
-                     { label: '执业统计', icon: TrendingUp, color: 'text-zinc-500', bg: 'bg-zinc-50' },
-                     { label: '年度审计', icon: Calendar, color: 'text-neutral-500', bg: 'bg-neutral-50' }
+                     { label: '案件审批', icon: Zap, color: 'text-slate-500', bg: 'bg-slate-50', tab: 'firm_cases' },
+                     { label: '薪酬结算', icon: DollarSign, color: 'text-stone-500', bg: 'bg-stone-50', tab: 'orders' },
+                     { label: '执业统计', icon: TrendingUp, color: 'text-zinc-500', bg: 'bg-zinc-50', tab: 'dashboard' },
+                     { label: '年度审计', icon: Calendar, color: 'text-neutral-500', bg: 'bg-neutral-50', tab: 'system_logs' }
                    ].map((item, i) => (
-                     <button key={i} className="flex flex-col items-center justify-center p-6 rounded-[20px] bg-slate-50/50 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all group border border-transparent hover:border-slate-100">
+                     <button key={i} onClick={() => onNavigate?.(item.tab)} className="flex flex-col items-center justify-center p-6 rounded-[20px] bg-slate-50/50 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all group border border-transparent hover:border-slate-100">
                         <div className={`p-4 rounded-2xl ${item.bg} ${item.color} mb-3 group-hover:scale-110 transition-transform`}>
                            <item.icon size={24} />
                         </div>
@@ -300,7 +341,7 @@ export default function Analytics() {
                  </div>
               </div>
 
-              <button className="w-full mt-8 h-12 rounded-2xl bg-slate-800 text-white text-[11px] font-bold shadow-xl shadow-slate-800/20 hover:bg-slate-700 transition-all flex items-center justify-center gap-2 group">
+              <button onClick={() => showToast('为您调取历史结案数据与营收模型，生成律所精细化运营建议书...')} className="w-full mt-8 h-12 rounded-2xl bg-slate-800 text-white text-[11px] font-bold shadow-xl shadow-slate-800/20 hover:bg-slate-700 transition-all flex items-center justify-center gap-2 group">
                  <span>获取深度咨询报告</span>
                  <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>

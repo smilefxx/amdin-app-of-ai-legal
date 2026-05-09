@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from './components/layout/AdminLayout';
 import Dashboard from './views/Dashboard';
 import TemplateLibrary from './views/TemplateLibrary';
@@ -39,6 +39,7 @@ import ComplianceDetails from './views/ComplianceDetails';
 import FinanceBilling from './views/FinanceBilling';
 import BillingCreator from './views/BillingCreator';
 import StatementExport from './views/StatementExport';
+import OrderDetails from './views/OrderDetails';
 import Analytics from './views/Analytics';
 import ArchiveCenter from './views/ArchiveCenter';
 import Settings from './views/Settings';
@@ -54,12 +55,21 @@ import { UserRole } from './types';
 export default function App() {
   const [role, setRole] = useState<UserRole>(UserRole.FIRM_ADMIN);
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  // Initialize theme
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('app-theme') || 'default';
+    if (savedTheme !== 'default') {
+      document.documentElement.className = `theme-${savedTheme}`;
+    }
+  }, []);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedGeneratorTemplate, setSelectedGeneratorTemplate] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
   const [selectedKnowledge, setSelectedKnowledge] = useState<any>(null);
   const [selectedClientSearch, setSelectedClientSearch] = useState<string>('');
   const [tickets, setTickets] = useState([
@@ -196,6 +206,7 @@ export default function App() {
       case 'issue_details': return '工单处理详情';
       case 'risk': return 'AI 风控中心';
       case 'orders': return '财务与结算';
+      case 'order_details': return '账单详情';
       case 'billing_creator': return '创建结算回款单';
       case 'statement_export': return '财务对账数据导出';
       case 'analytics': return '数据看板';
@@ -401,8 +412,14 @@ export default function App() {
         )}
         {activeTab === 'orders' && (
           <FinanceBilling 
-            onNavigate={(tab) => setActiveTab(tab)} 
+            onNavigate={(tab, param) => {
+              setActiveTab(tab);
+              if (param) setSelectedTransactionId(param);
+            }} 
           />
+        )}
+        {activeTab === 'order_details' && (
+          <OrderDetails orderId={selectedTransactionId} onBack={() => setActiveTab('orders')} />
         )}
         {activeTab === 'billing_creator' && (
           <BillingCreator onBack={() => setActiveTab('orders')} />
@@ -410,7 +427,7 @@ export default function App() {
         {activeTab === 'statement_export' && (
           <StatementExport onBack={() => setActiveTab('orders')} />
         )}
-        {activeTab === 'analytics' && <Analytics />}
+        {activeTab === 'analytics' && <Analytics onNavigate={setActiveTab} />}
         {activeTab === 'archived' && <ArchiveCenter />}
         {activeTab === 'settings' && <Settings onNavigate={setActiveTab} />}
         {activeTab === 'firms' && <FirmManagement />}
@@ -425,7 +442,7 @@ export default function App() {
           'firm_clients', 'client_editor', 'firm_contracts', 'template_upload', 'category_management',
           'firm_tasks', 'task_editor', 'task_calendar', 'firm_members', 'member_details', 'member_editor',
           'member_permissions', 'permission_management', 'firm_compliance', 'compliance_uploader',
-          'compliance_history', 'compliance_details', 'issues', 'issue_details', 'orders', 'billing_creator',
+          'compliance_history', 'compliance_details', 'issues', 'issue_details', 'orders', 'order_details', 'billing_creator',
           'statement_export', 'analytics', 'archived', 'settings', 'billing_plans', 'system_logs', 'risk', 'todos'
         ].includes(activeTab) && (
           <div className="flex flex-col items-center justify-center py-24 text-text-light card bg-white shadow-premium">

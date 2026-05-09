@@ -13,10 +13,11 @@ import {
   List,
   MoreVertical,
   Archive,
-  ArrowUpRight
+  ArrowUpRight,
+  CheckCircle2
 } from 'lucide-react';
 import { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import Dropdown from '@/src/components/common/Dropdown';
 import { DocumentPreviewModal } from '@/src/components/common/DocumentPreviewModal';
 
@@ -48,6 +49,33 @@ const ARCHIVED_DOCS: ArchivedDoc[] = [
 export default function ArchiveCenter() {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [previewDoc, setPreviewDoc] = useState<ArchivedDoc | null>(null);
+  const [activeCategory, setActiveCategory] = useState('按案件类型');
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 2500);
+  };
+
+  const handleDownload = (doc: ArchivedDoc) => {
+    showToast(`正在下载文件: ${doc.name}...`);
+    setTimeout(() => {
+      const element = document.createElement("a");
+      const file = new Blob([`Simulated Archive Download\n\nName: ${doc.name}\nType: ${doc.type}\nDate: ${doc.date}\nOwner: ${doc.owner}`], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = `${doc.id}_${doc.name}.txt`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 1000);
+  };
+
+  const CATEGORIES = [
+    { label: '按案件类型', count: 850 },
+    { label: '按结案时间', count: 320 },
+    { label: '按主办律师', count: 86 },
+    { label: '按客户性质', count: 42 },
+  ];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-10">
@@ -93,25 +121,23 @@ export default function ArchiveCenter() {
               </div>
 
               <div className="space-y-1">
-                 {[
-                   { label: '按案件类型', count: 850, active: true },
-                   { label: '按结案时间', count: 320, active: false },
-                   { label: '按主办律师', count: 86, active: false },
-                   { label: '按客户性质', count: 42, active: false },
-                 ].map((cat, i) => (
+                 {CATEGORIES.map((cat, i) => {
+                   const isActive = cat.label === activeCategory;
+                   return (
                    <button 
                     key={i} 
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm font-medium ${cat.active ? 'bg-blue-50 text-brand-primary' : 'text-text-secondary hover:bg-slate-50'}`}
+                    onClick={() => setActiveCategory(cat.label)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm font-medium ${isActive ? 'bg-blue-50 text-brand-primary' : 'text-text-secondary hover:bg-slate-50'}`}
                    >
                      <div className="flex items-center gap-3">
-                        <FolderLock size={18} className={cat.active ? 'text-brand-primary' : 'text-text-light'} />
+                        <FolderLock size={18} className={isActive ? 'text-brand-primary' : 'text-text-light'} />
                         {cat.label}
                      </div>
-                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cat.active ? 'bg-brand-primary text-white' : 'bg-slate-100 text-text-light'}`}>
+                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isActive ? 'bg-brand-primary text-white' : 'bg-slate-100 text-text-light'}`}>
                         {cat.count}
                      </span>
                    </button>
-                 ))}
+                 )})}
               </div>
 
               <div className="pt-4 border-t border-slate-50">
@@ -183,75 +209,118 @@ export default function ArchiveCenter() {
            </div>
 
            {/* Results */}
-           <div className="card-base overflow-hidden bg-white shadow-light border-slate-100">
-              <table className="w-full text-left">
-                 <thead>
-                    <tr className="bg-slate-50/50 border-b border-slate-100">
-                       <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest">案卷 ID / 名称</th>
-                       <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest">所属分类</th>
-                       <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest">归档日期</th>
-                       <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest">主办律师</th>
-                       <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest text-right">操作</th>
-                    </tr>
-                 </thead>
-                 <tbody className="divide-y divide-slate-100">
-                    {ARCHIVED_DOCS.map((doc, i) => (
-                      <motion.tr 
-                        key={doc.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+           <div className={`card-base overflow-hidden bg-white shadow-light border-slate-100 ${viewMode === 'grid' ? 'bg-transparent shadow-none border-none' : ''}`}>
+              {viewMode === 'list' && (
+                <table className="w-full text-left">
+                   <thead>
+                      <tr className="bg-slate-50/50 border-b border-slate-100">
+                         <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest">案卷 ID / 名称</th>
+                         <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest">所属分类</th>
+                         <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest">归档日期</th>
+                         <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest">主办律师</th>
+                         <th className="px-6 py-4 text-[10px] font-bold text-text-light uppercase tracking-widest text-right">操作</th>
+                      </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-100">
+                      {(activeCategory === '按结案时间' ? [...ARCHIVED_DOCS].reverse() : activeCategory === '按主办律师' ? [...ARCHIVED_DOCS].sort((a,b)=>a.owner.localeCompare(b.owner)) : activeCategory === '按客户性质' ? [...ARCHIVED_DOCS].sort((a,b)=>a.type.localeCompare(b.type)) : ARCHIVED_DOCS).map((doc, i) => (
+                        <motion.tr 
+                          key={`${doc.id}-${viewMode}-${activeCategory}`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: i * 0.05 }}
+                          className="hover:bg-blue-50/30 transition-colors cursor-pointer group"
+                        >
+                          <td className="px-6 py-5">
+                             <div className="flex items-center gap-4">
+                                <div className={`p-2.5 rounded-xl ${doc.status === '已加密' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
+                                   <FileText size={20} />
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                   <span className="text-sm font-bold text-text-main group-hover:text-brand-primary transition-colors truncate">{doc.name}</span>
+                                   <span className="text-[10px] text-text-light flex items-center gap-2">
+                                      {doc.id} <span className="w-1 h-1 rounded-full bg-slate-300 pointer-events-none"></span> {doc.size}
+                                   </span>
+                                </div>
+                             </div>
+                          </td>
+                          <td className="px-6 py-5">
+                             <span className="text-xs font-bold text-text-secondary">{doc.type}</span>
+                          </td>
+                          <td className="px-6 py-5">
+                             <div className="flex items-center gap-2 text-[11px] text-text-light">
+                                <Calendar size={14} />
+                                {doc.date}
+                             </div>
+                          </td>
+                          <td className="px-6 py-5">
+                             <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-slate-100 border border-white flex items-center justify-center text-[10px] font-bold text-text-secondary uppercase">
+                                   {doc.owner[0]}
+                                </div>
+                                <span className="text-xs font-bold text-text-main">{doc.owner}</span>
+                             </div>
+                          </td>
+                          <td className="px-6 py-5 text-right">
+                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => setPreviewDoc(doc)} className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100" title="预览">
+                                   <Eye size={18} />
+                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); handleDownload(doc); }} className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100" title="下载">
+                                   <Download size={18} />
+                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); showToast('更多操作暂未开放'); }} className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100">
+                                   <MoreVertical size={18} />
+                                </button>
+                             </div>
+                          </td>
+                        </motion.tr>
+                      ))}
+                   </tbody>
+                </table>
+              )}
+              {viewMode === 'grid' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                   {(activeCategory === '按结案时间' ? [...ARCHIVED_DOCS].reverse() : activeCategory === '按主办律师' ? [...ARCHIVED_DOCS].sort((a,b)=>a.owner.localeCompare(b.owner)) : activeCategory === '按客户性质' ? [...ARCHIVED_DOCS].sort((a,b)=>a.type.localeCompare(b.type)) : ARCHIVED_DOCS).map((doc, i) => (
+                     <motion.div 
+                        key={`${doc.id}-${viewMode}-${activeCategory}`}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: i * 0.05 }}
-                        className="hover:bg-blue-50/30 transition-colors cursor-pointer group"
-                      >
-                        <td className="px-6 py-5">
-                           <div className="flex items-center gap-4">
-                              <div className={`p-2.5 rounded-xl ${doc.status === '已加密' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
-                                 <FileText size={20} />
-                              </div>
-                              <div className="flex flex-col min-w-0">
-                                 <span className="text-sm font-bold text-text-main group-hover:text-brand-primary transition-colors truncate">{doc.name}</span>
-                                 <span className="text-[10px] text-text-light flex items-center gap-2">
-                                    {doc.id} <span className="w-1 h-1 rounded-full bg-slate-300 pointer-events-none"></span> {doc.size}
-                                 </span>
-                              </div>
+                        className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 hover:shadow-lg transition-all group"
+                     >
+                        <div className="flex items-start justify-between mb-4">
+                           <div className={`p-3 rounded-xl ${doc.status === '已加密' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
+                              <FileText size={20} />
                            </div>
-                        </td>
-                        <td className="px-6 py-5">
-                           <span className="text-xs font-bold text-text-secondary">{doc.type}</span>
-                        </td>
-                        <td className="px-6 py-5">
-                           <div className="flex items-center gap-2 text-[11px] text-text-light">
-                              <Calendar size={14} />
-                              {doc.date}
+                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={(e) => { e.stopPropagation(); setPreviewDoc(doc); }} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-text-light hover:text-brand-primary"><Eye size={16} /></button>
+                              <button onClick={(e) => { e.stopPropagation(); handleDownload(doc); }} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-text-light hover:text-brand-primary"><Download size={16} /></button>
                            </div>
-                        </td>
-                        <td className="px-6 py-5">
+                        </div>
+                        <h4 className="text-sm font-bold text-text-main line-clamp-2 mb-2 group-hover:text-brand-primary transition-colors">{doc.name}</h4>
+                        <div className="flex items-center gap-2 text-[11px] text-text-light mb-4">
+                           <span>{doc.id}</span>
+                           <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                           <span>{doc.size}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                            <div className="flex items-center gap-2">
                               <div className="w-6 h-6 rounded-full bg-slate-100 border border-white flex items-center justify-center text-[10px] font-bold text-text-secondary uppercase">
                                  {doc.owner[0]}
                               </div>
-                              <span className="text-xs font-bold text-text-main">{doc.owner}</span>
+                              <span className="text-xs font-bold text-text-secondary">{doc.owner}</span>
                            </div>
-                        </td>
-                        <td className="px-6 py-5 text-right">
-                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button onClick={() => setPreviewDoc(doc)} className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100" title="预览">
-                                 <Eye size={18} />
-                              </button>
-                              <button className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100" title="下载">
-                                 <Download size={18} />
-                              </button>
-                              <button className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100">
-                                 <MoreVertical size={18} />
-                              </button>
+                           <div className="flex items-center gap-1.5 text-[11px] text-text-light bg-slate-50 px-2 py-1 rounded-full">
+                              <Calendar size={12} />
+                              {doc.date}
                            </div>
-                        </td>
-                      </motion.tr>
-                    ))}
-                 </tbody>
-              </table>
+                        </div>
+                     </motion.div>
+                   ))}
+                </div>
+              )}
 
-              <div className="p-6 bg-slate-50/50 flex items-center justify-between border-t border-slate-100">
+              <div className="p-6 bg-slate-50/50 flex items-center justify-between border-t border-slate-100 mt-6 rounded-2xl">
                  <p className="text-xs text-text-light font-medium">显示 1-6 条，共 1,256 条案卷数据</p>
                  <div className="flex items-center gap-2">
                     <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-text-light opacity-50 cursor-not-allowed transition-all">1</button>
@@ -272,6 +341,23 @@ export default function ArchiveCenter() {
         type="case"
         status={previewDoc?.status === '已加密' ? '草稿' : '审核通过'}
       />
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl"
+          >
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <CheckCircle2 size={18} />
+            </div>
+            <p className="font-medium text-sm">{toastMsg}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

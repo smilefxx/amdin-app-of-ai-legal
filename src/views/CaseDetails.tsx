@@ -16,6 +16,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 
+import { motion, AnimatePresence } from 'motion/react';
+
 interface CaseDetailsProps {
   onBack: () => void;
   onNavigate?: (tab: string) => void;
@@ -23,6 +25,25 @@ interface CaseDetailsProps {
 
 export default function CaseDetails({ onBack, onNavigate }: CaseDetailsProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'history'>('overview');
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 2500);
+  };
+
+  const handleDownload = (docName: string) => {
+    showToast(`正在下载文书材料: ${docName}...`);
+    setTimeout(() => {
+      const element = document.createElement("a");
+      const file = new Blob([`Simulated Document Form\n\nName: ${docName}\nCase: 某科技公司专利侵权诉讼案`], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = docName;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 1000);
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -213,7 +234,7 @@ export default function CaseDetails({ onBack, onNavigate }: CaseDetailsProps) {
                      <td className="px-6 py-4"><span className="text-xs text-text-secondary">{doc.uploader}</span></td>
                      <td className="px-6 py-4 text-xs text-text-light font-mono">{doc.time}</td>
                      <td className="px-6 py-4 text-right">
-                        <button className="text-brand-primary text-xs font-bold hover:underline">下载</button>
+                        <button onClick={() => handleDownload(doc.name)} className="text-brand-primary text-xs font-bold hover:underline">下载</button>
                      </td>
                    </tr>
                  ))}
@@ -263,6 +284,23 @@ export default function CaseDetails({ onBack, onNavigate }: CaseDetailsProps) {
            </div>
         </div>
       )}
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl"
+          >
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <CheckCircle2 size={18} />
+            </div>
+            <p className="font-medium text-sm">{toastMsg}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

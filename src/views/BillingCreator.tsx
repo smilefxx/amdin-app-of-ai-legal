@@ -14,7 +14,8 @@ import {
   User,
   Calendar,
   ChevronDown,
-  Info
+  Info,
+  CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Dropdown from '@/src/components/common/Dropdown';
@@ -28,6 +29,20 @@ export default function BillingCreator({ onBack }: BillingCreatorProps) {
     { id: 1, desc: '法律咨询服务 - 知识产权', qty: 2.5, rate: 2000, total: 5000 },
     { id: 2, desc: '合同起草及审查', qty: 1, rate: 3500, total: 3500 },
   ]);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  };
+
+  const handleSave = () => {
+    showToast('正在创建并保存结算账单...');
+    setTimeout(() => {
+      setToastMsg('创建完成，即将返回对账单列表');
+      setTimeout(() => onBack(), 2000);
+    }, 1500);
+  };
 
   const addItem = () => {
     setItems([...items, { id: Date.now(), desc: '', qty: 0, rate: 0, total: 0 }]);
@@ -53,7 +68,21 @@ export default function BillingCreator({ onBack }: BillingCreatorProps) {
   const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 relative">
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -10, x: '-50%' }}
+            className="fixed top-8 left-1/2 z-50 px-6 py-3 bg-slate-800 text-white text-sm font-bold rounded-full shadow-2xl flex items-center gap-2 border border-slate-700"
+          >
+            <CheckCircle2 size={16} className="text-emerald-400" />
+            {toastMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -75,7 +104,7 @@ export default function BillingCreator({ onBack }: BillingCreatorProps) {
           >
             取消
           </button>
-          <button className="h-11 px-8 rounded-xl bg-brand-primary text-white text-sm font-bold shadow-lg shadow-brand-primary/20 hover:bg-blue-600 transition-all flex items-center gap-2">
+          <button onClick={handleSave} className="h-11 px-8 rounded-xl bg-brand-primary text-white text-sm font-bold shadow-lg shadow-brand-primary/20 hover:bg-blue-600 transition-all flex items-center gap-2">
             <Save size={18} />
             保存并生成
           </button>

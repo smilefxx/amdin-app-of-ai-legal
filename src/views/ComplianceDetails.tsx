@@ -24,7 +24,7 @@ import {
   BookOpen,
   Edit3
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface ComplianceDetailsProps {
   onBack: () => void;
@@ -33,6 +33,25 @@ interface ComplianceDetailsProps {
 
 export default function ComplianceDetails({ onBack, reportId }: ComplianceDetailsProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'clauses' | 'suggests'>('overview');
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 2500);
+  };
+
+  const handleDownload = () => {
+    showToast('正在生成合规分析报告 PDF 并下载...');
+    setTimeout(() => {
+      const element = document.createElement("a");
+      const file = new Blob([`Simulated Compliance Report PDF\n\nTitle: ${report.fileName}\nScore: ${report.score}`], {type: 'text/plain'});
+      element.href = URL.createObjectURL(file);
+      element.download = `${report.id}_合规分析报告.txt`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 1500);
+  };
 
   const report = {
     id: reportId || 'SCAN_9921',
@@ -65,7 +84,7 @@ export default function ComplianceDetails({ onBack, reportId }: ComplianceDetail
           <button className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-brand-primary transition-all flex items-center justify-center">
             <Printer size={18} />
           </button>
-          <button className="flex items-center gap-2 px-6 h-11 rounded-xl bg-brand-primary text-white text-xs font-bold hover:bg-blue-600 transition-all shadow-lg shadow-brand-primary/20">
+          <button onClick={handleDownload} className="flex items-center gap-2 px-6 h-11 rounded-xl bg-brand-primary text-white text-xs font-bold hover:bg-blue-600 transition-all shadow-lg shadow-brand-primary/20">
             <Download size={16} />
             下载分析报告
           </button>
@@ -205,6 +224,23 @@ export default function ComplianceDetails({ onBack, reportId }: ComplianceDetail
            </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl"
+          >
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <CheckCircle2 size={18} />
+            </div>
+            <p className="font-medium text-sm">{toastMsg}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
