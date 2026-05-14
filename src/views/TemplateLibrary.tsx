@@ -31,6 +31,7 @@ const MOCK_TEMPLATES: Template[] = [
   { id: '3', name: '行政处罚申辩书及听证申请', type: '行政处罚', version: 'V1.0', status: 'draft', usageCount: 0, successRate: '0%', rating: 0, updatedAt: '2026-04-20', author: '李华', variablesCount: 15 },
   { id: '4', name: '金融借款合同纠纷起诉状', type: '金融借款', version: 'V1.2', status: 'review', usageCount: 321, successRate: '95%', rating: 4.2, updatedAt: '2026-04-18', author: '陈红', variablesCount: 10 },
   { id: '5', name: '担保纠纷民事起诉状', type: '担保纠纷', version: 'V3.0', status: 'published', usageCount: 2100, successRate: '99%', rating: 4.9, updatedAt: '2026-04-15', author: '系统', variablesCount: 14 },
+  { id: '6', name: '网贷逾期催收律师函通用版', type: '网贷催收', version: 'V1.5', status: 'published', usageCount: 4530, successRate: '85%', rating: 4.6, updatedAt: '2026-05-10', author: '系统', variablesCount: 9 },
 ];
 
 interface TemplateLibraryProps {
@@ -93,6 +94,7 @@ export default function TemplateLibrary({ onEdit, onNavigate }: TemplateLibraryP
     { name: '行政处罚', count: 8 },
     { name: '金融借款', count: 24 },
     { name: '担保纠纷', count: 12 },
+    { name: '网贷催收', count: 35 },
     { name: '律师函', count: 27 }
   ];
 
