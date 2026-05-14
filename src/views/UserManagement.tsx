@@ -27,9 +27,43 @@ const MOCK_USERS = [
   { id: 'U006', name: '周志豪', role: '法务经理', firm: '盈科（深圳）法务部', email: 'zhou.zh@ying.com', phone: '13400009999', status: 'active', lastLogin: '今天 09:30' },
 ];
 
-export default function UserManagement() {
+export default function UserManagement({ onNavigate }: { onNavigate?: (tab: string) => void }) {
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  };
+
+  const handleExport = () => {
+    showToast('正在为您打包并导出审计报表...');
+    setTimeout(() => {
+      const element = document.createElement("a");
+      const file = new Blob(["Audit Report Data"], { type: 'application/pdf' });
+      element.href = URL.createObjectURL(file);
+      element.download = "platform_audit_report.pdf";
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      setToastMsg('报表导出完成！');
+      setTimeout(() => setToastMsg(null), 2000);
+    }, 1500);
+  };
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-10">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-10 relative">
+      {toastMsg && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20, x: '-50%' }}
+          animate={{ opacity: 1, y: 0, x: '-50%' }}
+          exit={{ opacity: 0, y: -10, x: '-50%' }}
+          className="fixed top-8 left-1/2 z-50 px-6 py-3 bg-slate-800 text-white text-sm font-bold rounded-full shadow-2xl flex items-center gap-2 border border-slate-700"
+        >
+          <CheckCircle2 size={16} className="text-emerald-400" />
+          {toastMsg}
+        </motion.div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -37,11 +71,11 @@ export default function UserManagement() {
           <p className="text-sm text-text-light">监控全平台所有律所成员、法务人员及个人的活跃状态与权限分发</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="btn-secondary h-11 px-6">
+          <button onClick={handleExport} className="btn-secondary h-11 px-6">
             <Shield size={18} />
             <span>导出账户审计报表</span>
           </button>
-          <button className="btn-primary h-11 px-8">
+          <button onClick={() => showToast('创建全平台账号功能维护中')} className="btn-primary h-11 px-8">
             <Plus size={18} />
             <span>创建全平台特权账号</span>
           </button>
@@ -84,7 +118,7 @@ export default function UserManagement() {
                     ]}
                     placeholder="全部角色"
                   />
-                  <button className="btn-secondary h-12 px-5 border-none bg-slate-50">
+                  <button onClick={() => showToast('正在应用筛选条件...')} className="btn-secondary h-12 px-5 border-none bg-slate-50">
                     <Filter size={18} />
                   </button>
                </div>
@@ -107,6 +141,7 @@ export default function UserManagement() {
                   {MOCK_USERS.map((user, i) => (
                     <motion.tr 
                       key={user.id}
+                      onClick={() => showToast(`加载 ${user.name} 的用户画像...`)}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: i * 0.05 }}
@@ -162,13 +197,13 @@ export default function UserManagement() {
                       </td>
                       <td className="px-6 py-5 text-right">
                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100">
+                            <button onClick={(e) => { e.stopPropagation(); showToast(`向 ${user.name} 发出安全警告...`); }} className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100">
                                <ShieldAlert size={18} />
                             </button>
-                            <button className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100">
+                            <button onClick={(e) => { e.stopPropagation(); showToast(`已停用 ${user.name} 的账号权限`); }} className="p-2 hover:text-brand-primary hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-100">
                                <Ban size={18} />
                             </button>
-                            <button className="flex items-center gap-1 text-xs font-bold text-brand-primary hover:bg-brand-primary/5 px-3 py-1.5 rounded-lg transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); showToast('用户画像详情页建设中...'); }} className="flex items-center gap-1 text-xs font-bold text-brand-primary hover:bg-brand-primary/5 px-3 py-1.5 rounded-lg transition-all">
                                <span>管理</span>
                                <ArrowRight size={14} />
                             </button>

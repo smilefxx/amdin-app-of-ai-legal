@@ -431,7 +431,7 @@ export default function App() {
         {activeTab === 'archived' && <ArchiveCenter />}
         {activeTab === 'settings' && <Settings onNavigate={setActiveTab} />}
         {activeTab === 'firms' && <FirmManagement />}
-        {activeTab === 'users' && <UserManagement />}
+        {activeTab === 'users' && <UserManagement onNavigate={setActiveTab} />}
         {activeTab === 'billing_plans' && <BillingPlans />}
         {activeTab === 'system_logs' && <SystemLogs />}
         {activeTab === 'risk' && <RiskEngine />}
